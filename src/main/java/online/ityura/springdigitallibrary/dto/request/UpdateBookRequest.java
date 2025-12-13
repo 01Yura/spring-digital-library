@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
+import online.ityura.springdigitallibrary.model.Genre;
 
 @Data
 @Schema(description = "Запрос на обновление книги (все поля опциональны)")
@@ -22,5 +23,8 @@ public class UpdateBookRequest {
     @Min(value = 1000, message = "Published year must be at least 1000")
     @Max(value = 9999, message = "Published year must be at most 9999")
     private Integer publishedYear;
+    
+    @Schema(description = "Жанр книги", example = "FICTION")
+    private Genre genre;
 }
 

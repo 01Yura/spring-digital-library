@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.model.Genre;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class BookResponse {
     private AuthorResponse author;
     private String description;
     private Integer publishedYear;
+    private Genre genre;
     private BigDecimal ratingAvg;
     private Integer ratingCount;
     private Boolean hasFile;

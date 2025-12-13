@@ -36,6 +36,10 @@ public class Book {
     @Column(name = "published_year")
     private Integer publishedYear;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "genre")
+    private Genre genre;
+    
     @Column(name = "deletion_locked", nullable = false)
     @Builder.Default
     private Boolean deletionLocked = false;
