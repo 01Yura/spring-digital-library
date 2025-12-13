@@ -35,8 +35,8 @@ public class BookController {
                     "Параметры пагинации: `page` (номер страницы, по умолчанию 0), `size` (размер страницы, по умолчанию 10), " +
                     "`sort` (сортировка, по умолчанию `title,asc`). " +
                     "Доступные поля для сортировки: `title` (название), `author.fullName` (автор), `ratingAvg` (рейтинг), " +
-                    "`createdAt` (дата добавления), `publishedYear` (год публикации), `updatedAt` (дата обновления). " +
-                    "Примеры: `title,asc`, `ratingAvg,desc`, `author.fullName,asc`, `createdAt,desc`."
+                    "`genre` (жанр), `createdAt` (дата добавления), `publishedYear` (год публикации), `updatedAt` (дата обновления). " +
+                    "Примеры: `title,asc`, `ratingAvg,desc`, `author.fullName,asc`, `genre,asc`, `createdAt,desc`."
     )
     @ApiResponses(value = {
             @ApiResponse(
