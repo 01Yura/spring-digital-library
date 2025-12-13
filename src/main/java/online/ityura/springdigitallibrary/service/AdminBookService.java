@@ -173,6 +173,42 @@ public class AdminBookService {
         bookRepository.delete(book);
     }
     
+    @Transactional
+    public void deleteAuthorAndAllBooks(Long authorId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Author not found with id: " + authorId));
+        
+        // Находим все книги автора
+        List<Book> books = bookRepository.findByAuthorId(authorId);
+        
+        // Для каждой книги проверяем ограничения и удаляем
+        for (Book book : books) {
+            Long bookId = book.getId();
+            
+            // Проверка deletion_locked
+            if (book.getDeletionLocked()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                        "Cannot delete book with id " + bookId + ": deletion is locked");
+            }
+            
+            // Проверка наличия связанных отзывов
+            if (reviewRepository.countByBookId(bookId) > 0) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                        "Cannot delete book with id " + bookId + ": it has reviews");
+            }
+            
+            // Удаляем файл если есть
+            bookFileRepository.findByBookId(bookId).ifPresent(bookFileRepository::delete);
+            
+            // Удаляем книгу через репозиторий (соблюдает все проверки)
+            bookRepository.delete(book);
+        }
+        
+        // Удаляем автора
+        authorRepository.delete(author);
+    }
+    
     private BookResponse mapToBookResponse(Book book) {
         boolean hasFile = bookFileRepository.existsByBookId(book.getId());
         

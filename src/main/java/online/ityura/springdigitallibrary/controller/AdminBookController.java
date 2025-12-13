@@ -101,7 +101,7 @@ public class AdminBookController {
     @Operation(
             summary = "Удалить книгу",
             description = "Удаляет книгу из каталога. Удаление запрещено, если: " +
-                    "1) deletion_locked = true, 2) есть связанные отзывы. Требуется роль ADMIN."
+                    "1) deletion_locked = true (на уровне БД), 2) есть связанные отзывы. Требуется роль ADMIN."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Книга успешно удалена"),
@@ -113,6 +113,28 @@ public class AdminBookController {
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId) {
         adminBookService.deleteBook(bookId);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @Operation(
+            summary = "Удалить автора и все его книги",
+            description = "Удаляет автора и все его книги из каталога. " +
+                    "При удалении также удаляются все связанные данные: файлы книг, отзывы и рейтинги. " +
+                    "Удаление запрещено, если у какой-либо книги: " +
+                    "1) deletion_locked = true (на уровне БД), 2) есть связанные отзывы. " +
+                    "Требуется роль ADMIN."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Автор и все его книги успешно удалены"),
+            @ApiResponse(responseCode = "404", description = "Автор не найден"),
+            @ApiResponse(responseCode = "403", description = "Удаление запрещено (deletion_locked или есть отзывы)"),
+            @ApiResponse(responseCode = "409", description = "Конфликт (книга имеет отзывы)")
+    })
+    @DeleteMapping("/authors/{authorId}")
+    public ResponseEntity<Void> deleteAuthorAndAllBooks(
+            @Parameter(description = "ID автора", example = "1", required = true)
+            @PathVariable Long authorId) {
+        adminBookService.deleteAuthorAndAllBooks(authorId);
         return ResponseEntity.noContent().build();
     }
 }
