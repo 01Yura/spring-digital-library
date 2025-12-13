@@ -4,6 +4,7 @@ import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.AuthResponse;
+import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.security.JwtTokenProvider;
@@ -30,7 +31,7 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
     
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
@@ -44,12 +45,7 @@ public class AuthService {
         
         user = userRepository.save(user);
         
-        String accessToken = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole().name());
-        
-        return AuthResponse.builder()
-                .token(accessToken)
-                .refreshToken(refreshToken)
+        return RegisterResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .role(user.getRole().name())

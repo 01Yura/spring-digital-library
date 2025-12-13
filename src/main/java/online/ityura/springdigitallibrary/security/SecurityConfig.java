@@ -47,6 +47,8 @@ public class SecurityConfig {
                     "/swagger-ui/index.html"
                 ).permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/books").permitAll()
+                .requestMatchers("/api/v1/books/*").permitAll()
                 .requestMatchers("/api/v1/books/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )

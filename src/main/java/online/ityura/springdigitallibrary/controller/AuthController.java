@@ -4,6 +4,7 @@ import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.AuthResponse;
+import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +29,7 @@ public class AuthController {
     
     @Operation(
             summary = "Регистрация нового пользователя",
-            description = "Создает нового пользователя с ролью USER. Возвращает access токен (5 минут) и refresh токен (24 часа) для дальнейшей аутентификации."
+            description = "Создает нового пользователя с ролью USER. Возвращает информацию о зарегистрированном пользователе."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -36,16 +37,16 @@ public class AuthController {
                     description = "Пользователь успешно зарегистрирован",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = AuthResponse.class),
-                            examples = @ExampleObject(value = "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\"type\":\"Bearer\",\"refreshToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\"userId\":1,\"email\":\"user@example.com\",\"role\":\"USER\"}")
+                            schema = @Schema(implementation = RegisterResponse.class),
+                            examples = @ExampleObject(value = "{\"userId\":1,\"email\":\"user@example.com\",\"role\":\"USER\"}")
                     )
             ),
             @ApiResponse(responseCode = "400", description = "Неверный формат данных"),
             @ApiResponse(responseCode = "409", description = "Email уже существует")
     })
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+        RegisterResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
