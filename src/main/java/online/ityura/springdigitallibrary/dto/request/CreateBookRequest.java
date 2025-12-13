@@ -25,8 +25,5 @@ public class CreateBookRequest {
     @Min(value = 1000, message = "Published year must be at least 1000")
     @Max(value = 9999, message = "Published year must be at most 9999")
     private Integer publishedYear;
-    
-    @Schema(description = "ISBN книги", example = "978-0-123456-78-9")
-    private String isbn;
 }
 

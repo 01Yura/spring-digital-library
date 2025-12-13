@@ -3,7 +3,7 @@ package online.ityura.springdigitallibrary.controller;
 import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
-import online.ityura.springdigitallibrary.dto.response.AuthResponse;
+import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,15 +60,16 @@ public class AuthController {
                     description = "Успешный вход",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = AuthResponse.class)
+                            schema = @Schema(implementation = LoginResponse.class),
+                            examples = @ExampleObject(value = "{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"refreshToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"tokenType\":\"Bearer\"}")
                     )
             ),
             @ApiResponse(responseCode = "401", description = "Неверные учетные данные"),
             @ApiResponse(responseCode = "400", description = "Неверный формат данных")
     })
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
     
@@ -83,15 +84,16 @@ public class AuthController {
                     description = "Токены успешно обновлены",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = AuthResponse.class)
+                            schema = @Schema(implementation = LoginResponse.class),
+                            examples = @ExampleObject(value = "{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"refreshToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"tokenType\":\"Bearer\"}")
                     )
             ),
             @ApiResponse(responseCode = "400", description = "Неверный формат данных"),
             @ApiResponse(responseCode = "401", description = "Refresh токен недействителен или истек")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        AuthResponse response = authService.refreshToken(request);
+    public ResponseEntity<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        LoginResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
     }
 }

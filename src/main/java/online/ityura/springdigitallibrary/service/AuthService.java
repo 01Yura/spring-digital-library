@@ -3,7 +3,7 @@ package online.ityura.springdigitallibrary.service;
 import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
-import online.ityura.springdigitallibrary.dto.response.AuthResponse;
+import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
@@ -52,7 +52,7 @@ public class AuthService {
                 .build();
     }
     
-    public AuthResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -66,16 +66,14 @@ public class AuthService {
         String accessToken = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole().name());
         
-        return AuthResponse.builder()
-                .token(accessToken)
+        return LoginResponse.builder()
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .userId(user.getId())
-                .email(user.getEmail())
-                .role(user.getRole().name())
+                .tokenType("Bearer")
                 .build();
     }
     
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
+    public LoginResponse refreshToken(RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
         
         // Проверяем, что это действительно refresh токен
@@ -106,12 +104,10 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole().name());
         
-        return AuthResponse.builder()
-                .token(newAccessToken)
+        return LoginResponse.builder()
+                .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
-                .userId(user.getId())
-                .email(user.getEmail())
-                .role(user.getRole().name())
+                .tokenType("Bearer")
                 .build();
     }
 }

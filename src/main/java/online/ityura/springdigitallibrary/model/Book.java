@@ -36,9 +36,6 @@ public class Book {
     @Column(name = "published_year")
     private Integer publishedYear;
     
-    @Column(unique = true)
-    private String isbn;
-    
     @Column(name = "deletion_locked", nullable = false)
     @Builder.Default
     private Boolean deletionLocked = false;

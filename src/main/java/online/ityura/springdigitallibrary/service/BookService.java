@@ -42,7 +42,6 @@ public class BookService {
                         .build())
                 .description(book.getDescription())
                 .publishedYear(book.getPublishedYear())
-                .isbn(book.getIsbn())
                 .ratingAvg(book.getRatingAvg())
                 .ratingCount(book.getRatingCount())
                 .hasFile(hasFile)

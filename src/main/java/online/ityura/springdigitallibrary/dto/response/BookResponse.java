@@ -18,7 +18,6 @@ public class BookResponse {
     private AuthorResponse author;
     private String description;
     private Integer publishedYear;
-    private String isbn;
     private BigDecimal ratingAvg;
     private Integer ratingCount;
     private Boolean hasFile;

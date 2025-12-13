@@ -52,7 +52,6 @@ public class AdminBookService {
                 .author(author)
                 .description(request.getDescription())
                 .publishedYear(request.getPublishedYear())
-                .isbn(request.getIsbn())
                 .deletionLocked(false)
                 .build();
         
@@ -102,9 +101,6 @@ public class AdminBookService {
         if (request.getPublishedYear() != null) {
             book.setPublishedYear(request.getPublishedYear());
         }
-        if (request.getIsbn() != null) {
-            book.setIsbn(request.getIsbn());
-        }
         
         book = bookRepository.save(book);
         return mapToBookResponse(book);
@@ -147,7 +143,6 @@ public class AdminBookService {
                         .build())
                 .description(book.getDescription())
                 .publishedYear(book.getPublishedYear())
-                .isbn(book.getIsbn())
                 .ratingAvg(book.getRatingAvg())
                 .ratingCount(book.getRatingCount())
                 .hasFile(hasFile)
