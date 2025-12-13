@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin/books")
 @Tag(name = "Администрирование книг", description = "API для управления книгами (требуется роль ADMIN)")
@@ -46,6 +48,30 @@ public class AdminBookController {
     public ResponseEntity<BookResponse> createBook(@Valid @RequestBody CreateBookRequest request) {
         BookResponse response = adminBookService.createBook(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    @Operation(
+            summary = "Создать несколько книг одновременно",
+            description = "Создает несколько книг в каталоге за один запрос. Передайте массив объектов CreateBookRequest. " +
+                    "Авторы будут созданы автоматически, если их еще нет. " +
+                    "Каждая книга должна быть уникальна по паре (title, author). " +
+                    "Если хотя бы одна книга не может быть создана (конфликт уникальности), вся операция откатывается. " +
+                    "Требуется роль ADMIN."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Все книги успешно созданы",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Неверный формат данных"),
+            @ApiResponse(responseCode = "403", description = "Недостаточно прав (требуется роль ADMIN)"),
+            @ApiResponse(responseCode = "409", description = "Одна из книг с таким названием и автором уже существует")
+    })
+    @PostMapping("/batch")
+    public ResponseEntity<List<BookResponse>> createBooks(@Valid @RequestBody List<CreateBookRequest> requests) {
+        List<BookResponse> responses = adminBookService.createBooks(requests);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
     
     @Operation(

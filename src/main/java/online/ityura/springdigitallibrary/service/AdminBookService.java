@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class AdminBookService {
     
@@ -58,6 +61,41 @@ public class AdminBookService {
         
         book = bookRepository.save(book);
         return mapToBookResponse(book);
+    }
+    
+    @Transactional
+    public List<BookResponse> createBooks(List<CreateBookRequest> requests) {
+        List<BookResponse> responses = new ArrayList<>();
+        
+        for (CreateBookRequest request : requests) {
+            // Проверка уникальности (title, author)
+            Author author = authorRepository.findByFullName(request.getAuthorName())
+                    .orElseGet(() -> {
+                        Author newAuthor = Author.builder()
+                                .fullName(request.getAuthorName())
+                                .build();
+                        return authorRepository.save(newAuthor);
+                    });
+            
+            if (bookRepository.existsByTitleAndAuthorId(request.getTitle(), author.getId())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                        "Book with title '" + request.getTitle() + "' and author '" + request.getAuthorName() + "' already exists");
+            }
+            
+            Book book = Book.builder()
+                    .title(request.getTitle())
+                    .author(author)
+                    .description(request.getDescription())
+                    .publishedYear(request.getPublishedYear())
+                    .genre(request.getGenre())
+                    .deletionLocked(false)
+                    .build();
+            
+            book = bookRepository.save(book);
+            responses.add(mapToBookResponse(book));
+        }
+        
+        return responses;
     }
     
     @Transactional
