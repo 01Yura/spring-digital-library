@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/v1/books/{bookId}")
-@Tag(name = "Файлы книг", description = "API для скачивания PDF файлов книг")
+@Tag(name = "Файлы книг", description = "API для скачивания PDF файлов книг (пока не реализован!)")
 @SecurityRequirement(name = "Bearer Authentication")
 public class BookFileController {
     
