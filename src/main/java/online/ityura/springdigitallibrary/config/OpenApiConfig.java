@@ -25,10 +25,10 @@ public class OpenApiConfig {
                                 "Может содержать баги. Активно не поддерживается, однако работает.<br>" +
                                 "Может использоваться QA для тренировки тестирования бэкенда в связке с БД.<br><br>" +
                                 "Для подключения к БД PostgreSQL используйте следующие параметры подключения:<br>" +
-                                "&nbsp;&nbsp;IP: 176.126.103.46<br>" +
-                                "&nbsp;&nbsp;Database: spring_digital_bookstore<br>" +
-                                "&nbsp;&nbsp;Username: readonly_user<br>" +
-                                "&nbsp;&nbsp;Password: pass_123_XYZ!")
+                                "&nbsp;&nbsp;<b>IP:</b> 176.126.103.46<br>" +
+                                "&nbsp;&nbsp;<b>Database:</b> spring_digital_bookstore<br>" +
+                                "&nbsp;&nbsp;<b>Username:</b> readonly_user<br>" +
+                                "&nbsp;&nbsp;<b>Password:</b> pass_123_XYZ!")
                         .contact(new Contact()
                                 .name("Developer contact")
                                 .url("https://github.com/01Yura"))
