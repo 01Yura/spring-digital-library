@@ -1,0 +1,69 @@
+version: "3.8"
+
+services:
+  # PostgreSQL база данных
+  postgres:
+    image: postgres:16-alpine
+    container_name: spring-digital-library-db
+    environment:
+      POSTGRES_DB: spring_digital_bookstore
+      POSTGRES_USER: nobugs228
+      POSTGRES_PASSWORD: nobugs228PASSWORD!#
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - spring-library-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nobugs228 -d spring_digital_bookstore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Spring Boot приложение
+  app:
+    image: 01yura/spring-digital-bookstore:latest
+    container_name: spring-digital-bookstore-app
+    environment:
+      # Настройки подключения к БД
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/spring_digital_bookstore
+      SPRING_DATASOURCE_USERNAME: nobugs228
+      SPRING_DATASOURCE_PASSWORD: nobugs228PASSWORD!#
+
+      # JPA/Hibernate настройки
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+
+      # JWT настройки
+      JWT_SECRET: my-secret-key-for-jwt-generation
+      JWT_EXPIRATION: 300000
+      JWT_REFRESH_EXPIRATION: 86400000
+
+      # Swagger/OpenAPI настройки
+      SPRINGDOC_API_DOCS_PATH: /v3/api-docs
+      SPRINGDOC_SWAGGER_UI_PATH: /swagger-ui.html
+      SPRINGDOC_SWAGGER_UI_OPERATIONS_SORTER: method
+      SPRINGDOC_SWAGGER_UI_TAGS_SORTER: alpha
+
+      # JVM настройки
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-library-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  spring-library-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
