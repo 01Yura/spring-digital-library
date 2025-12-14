@@ -18,9 +18,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByBookIdAndUserId(Long bookId, Long userId);
     boolean existsByBookIdAndUserId(Long bookId, Long userId);
     
-    @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.book.id = :bookId ORDER BY r.createdAt DESC")
-    List<Review> findByBookIdWithUserOrderByCreatedAtDesc(@Param("bookId") Long bookId);
-    
     @Query("SELECT COUNT(r) FROM Review r WHERE r.book.id = :bookId")
     long countByBookId(@Param("bookId") Long bookId);
 }
