@@ -8,6 +8,7 @@ import online.ityura.springdigitallibrary.model.Genre;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,5 +26,6 @@ public class BookResponse {
     private Boolean hasFile;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<ReviewResponse> reviews;
 }
 

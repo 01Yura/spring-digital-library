@@ -3,14 +3,22 @@ package online.ityura.springdigitallibrary.config;
 import online.ityura.springdigitallibrary.model.Author;
 import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.model.Genre;
+import online.ityura.springdigitallibrary.model.Rating;
+import online.ityura.springdigitallibrary.model.Review;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.AuthorRepository;
 import online.ityura.springdigitallibrary.repository.BookRepository;
+import online.ityura.springdigitallibrary.repository.RatingRepository;
+import online.ityura.springdigitallibrary.repository.ReviewRepository;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -26,6 +34,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private AuthorRepository authorRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
+
+    private final Random random = new Random();
 
     @Override
     public void run(String... args) throws Exception {
@@ -46,6 +62,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // Инициализация книг
         initializeBooks();
+        
+        // Добавление смешных отзывов к каждой второй книге
+        addFunnyReviews();
     }
 
     private void initializeBooks() {
@@ -85,7 +104,7 @@ public class DataInitializer implements CommandLineRunner {
                 new BookData("Hello World, My Old Friend", "Max Compiler", "Existential thoughts of a developer who prints logs for a living", 2019, Genre.FOR_NERDS),
                 new BookData("404: Social Life Not Found", "Alex Turner", "Advanced guide to avoiding people using code, headphones, and deadlines", 2020, Genre.FOR_NERDS),
                 new BookData("Refactor First, Ask Questions Later", "Robert Martin", "Why touching legacy code is scary but still unavoidable", 2018, Genre.FOR_NERDS),
-                new BookData("Git Push and Pray", "Nina Carter", "A spiritual journey through force-pushes and broken pipelines", 2022, Genre.FOR_NERDS)
+                new BookData("Git Push and Pray", "Nina Carter", "A spiritual journey through force-pushes and broken pipelines", 2022, Genre.FOR_NERDS),
                 new BookData("Fifty Shades of Pull Requests", "Anonymous Author", "A forbidden romance between a junior developer and production branch", 2016, Genre.PORNO),
                 new BookData("Hardcoded Desires", "Johnny Runtime", "Passion, constants, and values that should never be in plain text", 2017, Genre.PORNO),
                 new BookData("Backend After Midnight", "Lola Stacktrace", "Things get hot when the frontend finally stops calling", 2019, Genre.PORNO),
@@ -96,6 +115,7 @@ public class DataInitializer implements CommandLineRunner {
 
         int createdCount = 0;
         int existingCount = 0;
+        List<Book> savedBooks = new ArrayList<>();
 
         for (BookData bookData : booksData) {
             // Находим или создаем автора
@@ -108,8 +128,9 @@ public class DataInitializer implements CommandLineRunner {
                     });
 
             // Проверяем, существует ли уже книга с таким названием и автором
+            Book book;
             if (!bookRepository.existsByTitleAndAuthorId(bookData.title, author.getId())) {
-                Book book = Book.builder()
+                book = Book.builder()
                         .title(bookData.title)
                         .author(author)
                         .description(bookData.description)
@@ -118,14 +139,139 @@ public class DataInitializer implements CommandLineRunner {
                         .deletionLocked(false)
                         .build();
 
-                bookRepository.save(book);
+                book = bookRepository.save(book);
                 createdCount++;
             } else {
+                book = bookRepository.findByTitleAndAuthorId(bookData.title, author.getId())
+                        .orElse(null);
                 existingCount++;
+            }
+            
+            if (book != null) {
+                savedBooks.add(book);
             }
         }
 
         System.out.println("Books initialization completed: " + createdCount + " created, " + existingCount + " already exist.");
+        
+        // Сохраняем список книг для последующего добавления отзывов
+        this.savedBooks = savedBooks;
+    }
+    
+    private List<Book> savedBooks;
+    
+    private void addFunnyReviews() {
+        // Получаем или создаем тестовых пользователей для отзывов
+        User reviewer1 = getOrCreateUser("funny_reviewer_1", "funny1@example.com");
+        User reviewer2 = getOrCreateUser("funny_reviewer_2", "funny2@example.com");
+        User reviewer3 = getOrCreateUser("funny_reviewer_3", "funny3@example.com");
+        
+        List<User> reviewers = List.of(reviewer1, reviewer2, reviewer3);
+        
+        // Список смешных отзывов
+        String[] funnyReviews = {
+            "Прочитал за один присест! Правда, пришлось три раза перезагружать компьютер, но оно того стоило!",
+            "Купил книгу случайно, думал это про кулинарию. Теперь я Senior Developer! 10/10, рекомендую!",
+            "Автор явно не тестировал код перед публикацией. У меня ничего не работает, но читать было весело!",
+            "Книга отличная, но почему-то после прочтения мой код стал еще хуже. Возможно, я что-то не так понял?",
+            "Прочитал на работе вместо выполнения задач. Босс недоволен, но я теперь знаю про dependency injection!",
+            "Купил для подарка другу-программисту. Он плакал от смеха, а потом от отчаяния. Отличная книга!",
+            "Книга помогла мне понять, что я вообще ничего не понимаю в программировании. Спасибо за просветление!",
+            "Прочитал за выходные. Теперь у меня нет выходных, но зато есть понимание Spring Boot!",
+            "Книга настолько хорошая, что я забыл поесть. И поспать. И выйти из дома. Помогите!",
+            "Автор обещал, что после прочтения я стану гуру. Я стал гуру в чтении книг о программировании!",
+            "Купил книгу, прочитал, ничего не понял, перечитал, снова ничего не понял. Купил еще одну книгу!",
+            "Книга изменила мою жизнь! Теперь я не сплю по ночам, но не потому что читаю, а потому что дебажу код!",
+            "Прочитал книгу и понял, что все эти годы я программировал неправильно. Теперь я программирую еще неправильнее!",
+            "Книга отличная, но почему-то мой кот начал писать на Java после того, как я ее прочитал. Это нормально?",
+            "Купил книгу для повышения квалификации. Теперь я квалифицированно не сплю по ночам!",
+            "Прочитал книгу и решил переписать весь проект. Теперь у меня нет проекта, но есть опыт!",
+            "Книга помогла мне понять, что я не один такой. Есть еще люди, которые не понимают, что они делают!",
+            "Купил книгу случайно, открыл случайно, прочитал случайно. Теперь я случайный Senior Developer!",
+            "Книга настолько информативная, что после прочтения мой мозг перезагрузился. Пришлось перечитать!",
+            "Прочитал книгу и понял, что все мои проблемы были из-за того, что я не читал эту книгу раньше!",
+            "Купил книгу по совету коллеги. Теперь я понимаю, почему он уволился!",
+            "Прочитал книгу и начал видеть код во сне. Просыпаюсь и пишу на Java. Помогите!",
+            "Книга отличная, но почему-то после прочтения мой компьютер начал сам себя обновлять. Это нормально?",
+            "Купил книгу для изучения. Теперь я знаю, что не знаю ничего. Спасибо за честность!",
+            "Прочитал книгу за один день. На следующий день забыл все. Перечитал. Забыл снова. Цикл бесконечен!",
+            "Книга помогла мне понять, что мой код - это не баги, это фичи! Спасибо за вдохновение!",
+            "Купил книгу случайно, прочитал случайно, понял случайно. Теперь я случайный архитектор!",
+            "Прочитал книгу и решил стать программистом. Теперь я программист, который не умеет программировать!",
+            "Книга настолько хорошая, что я купил еще 5 экземпляров. На всякий случай. И для друзей. И для кота.",
+            "Прочитал книгу и понял, что все эти годы я использовал неправильный фреймворк. Теперь использую еще неправильнее!",
+            "Купил книгу для повышения зарплаты. Зарплата не повысилась, но я теперь знаю про паттерны проектирования!",
+            "Прочитал книгу и начал рефакторить весь код. Теперь у меня нет рабочего кода, но есть понимание!",
+            "Книга отличная, но почему-то после прочтения мой IDE начал предлагать мне уволиться. Это нормально?",
+            "Купил книгу по акции. Теперь понимаю, почему она была по акции!",
+            "Прочитал книгу и понял, что мой код - это произведение искусства. Плохого искусства, но искусства!",
+            "Книга помогла мне понять, что я не тупой, просто книга слишком умная для меня!",
+            "Прочитал книгу и начал писать комментарии на русском. Теперь весь код на русском. Помогите!",
+            "Купил книгу для изучения. Теперь я эксперт в чтении книг о программировании. Код все еще не работает!"
+        };
+        
+        int reviewIndex = 0;
+        int reviewsAdded = 0;
+        
+        // Добавляем отзывы к каждой второй книге (начиная с индекса 1: 1, 3, 5, 7...)
+        for (int i = 1; i < savedBooks.size(); i += 2) {
+            Book book = savedBooks.get(i);
+            
+            // Определяем количество отзывов (1 или 2)
+            int numberOfReviews = random.nextInt(2) + 1; // 1 или 2
+            
+            for (int j = 0; j < numberOfReviews; j++) {
+                // Выбираем случайного ревьюера
+                User reviewer = reviewers.get(random.nextInt(reviewers.size()));
+                
+                // Проверяем, нет ли уже отзыва от этого пользователя
+                if (reviewRepository.existsByBookIdAndUserId(book.getId(), reviewer.getId())) {
+                    continue;
+                }
+                
+                // Выбираем случайный отзыв
+                String reviewText = funnyReviews[reviewIndex % funnyReviews.length];
+                reviewIndex++;
+                
+                // Создаем отзыв
+                Review review = Review.builder()
+                        .book(book)
+                        .user(reviewer)
+                        .text(reviewText)
+                        .build();
+                reviewRepository.save(review);
+                
+                // Создаем оценку (от 3 до 5, чтобы было смешно)
+                short ratingValue = (short) (random.nextInt(3) + 3); // 3, 4 или 5
+                
+                // Проверяем, нет ли уже оценки от этого пользователя
+                if (!ratingRepository.existsByBookIdAndUserId(book.getId(), reviewer.getId())) {
+                    Rating rating = Rating.builder()
+                            .book(book)
+                            .user(reviewer)
+                            .value(ratingValue)
+                            .build();
+                    ratingRepository.save(rating);
+                }
+                
+                reviewsAdded++;
+            }
+        }
+        
+        System.out.println("Funny reviews initialization completed: " + reviewsAdded + " reviews added.");
+    }
+    
+    private User getOrCreateUser(String nickname, String email) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User user = User.builder()
+                            .nickname(nickname)
+                            .email(email)
+                            .passwordHash(passwordEncoder.encode("password123"))
+                            .role(User.Role.USER)
+                            .build();
+                    return userRepository.save(user);
+                });
     }
 
     // Вспомогательный класс для хранения данных о книге
