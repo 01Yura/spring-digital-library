@@ -52,7 +52,7 @@ services:
       # JVM настройки
       JAVA_OPTS: "-Xmx512m -Xms256m"
     ports:
-      - "8080:8080"
+      - "8088:8080"
     networks:
       - spring-library-network
     depends_on:
