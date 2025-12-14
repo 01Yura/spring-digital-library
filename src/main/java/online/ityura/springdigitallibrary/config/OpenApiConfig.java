@@ -19,17 +19,16 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Spring Digital Bookstore API")
                         .version("1.0.0")
-                        .description("REST API для цифрового книжного магазина. " +
-                                "Поддерживает управление книгами, отзывами, рейтингами и скачивание PDF файлов.\n" +
-                                "Данный проект был создан исключительно в целях самообучения при изучении Spring Boot" +
-                                " в далеком 2023 году. Может содержать баги. Активно не поддерживается, однако " +
-                                "работает. Может использоваться QA для тренировки тестирования бэкенда в связке с БД." +
-                                "Для подключения к БД PostgreSQL используйте следующие " +
-                                "параметры подключения:\n" +
-                                "  IP: 176.126.103.46\n" +
-                                "  Database: spring_digital_bookstore\n" +
-                                "  Username: readonly_user\n" +
-                                "  Password: pass_123_XYZ!\n ")
+                        .description("REST API для цифрового книжного магазина.<br>" +
+                                "Поддерживает управление книгами, отзывами, рейтингами и скачивание PDF файлов.<br><br>" +
+                                "Данный проект был создан исключительно в целях самообучения при изучении Spring Boot в далеком 2023 году.<br>" +
+                                "Может содержать баги. Активно не поддерживается, однако работает.<br>" +
+                                "Может использоваться QA для тренировки тестирования бэкенда в связке с БД.<br><br>" +
+                                "Для подключения к БД PostgreSQL используйте следующие параметры подключения:<br>" +
+                                "&nbsp;&nbsp;IP: 176.126.103.46<br>" +
+                                "&nbsp;&nbsp;Database: spring_digital_bookstore<br>" +
+                                "&nbsp;&nbsp;Username: readonly_user<br>" +
+                                "&nbsp;&nbsp;Password: pass_123_XYZ!")
                         .contact(new Contact()
                                 .name("Developer contact")
                                 .url("https://github.com/01Yura"))
