@@ -2,6 +2,7 @@ package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.response.BookResponse;
 import online.ityura.springdigitallibrary.dto.response.MessageResponse;
+import online.ityura.springdigitallibrary.service.BookImageService;
 import online.ityura.springdigitallibrary.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,9 @@ public class BookController {
     
     @Autowired
     private BookService bookService;
+    
+    @Autowired
+    private BookImageService bookImageService;
     
     @Operation(
             summary = "Получить список книг",
@@ -77,6 +83,66 @@ public class BookController {
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId) {
         return ResponseEntity.ok(bookService.getBookById(bookId));
+    }
+    
+    @Operation(
+            summary = "Получить изображение книги",
+            description = "Возвращает изображение книги по её ID. " +
+                    "Доступно без авторизации."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Изображение успешно получено",
+                    content = @Content(mediaType = "image/png, image/jpeg, image/jpg")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга или изображение не найдены",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
+    })
+    @SecurityRequirements
+    @GetMapping("/{bookId}/image")
+    public ResponseEntity<Resource> getBookImage(
+            @Parameter(description = "ID книги", example = "1", required = true)
+            @PathVariable Long bookId) {
+        Resource resource = bookImageService.getBookImage(bookId);
+        
+        // Определяем MediaType на основе расширения файла
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        try {
+            String imagePath = resource.getURI().getPath();
+            String extension = "";
+            if (imagePath != null && imagePath.contains(".")) {
+                extension = imagePath.substring(imagePath.lastIndexOf(".") + 1).toLowerCase();
+            }
+            
+            switch (extension) {
+                case "png":
+                    mediaType = MediaType.IMAGE_PNG;
+                    break;
+                case "jpg":
+                case "jpeg":
+                    mediaType = MediaType.IMAGE_JPEG;
+                    break;
+                case "gif":
+                    mediaType = MediaType.IMAGE_GIF;
+                    break;
+                case "webp":
+                    mediaType = MediaType.parseMediaType("image/webp");
+                    break;
+                default:
+                    mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            }
+        } catch (Exception e) {
+            // Если не удалось определить тип, используем по умолчанию
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+        
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(resource);
     }
 }
 

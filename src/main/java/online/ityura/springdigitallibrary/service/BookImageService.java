@@ -4,6 +4,8 @@ import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,6 +103,34 @@ public class BookImageService {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
                     "Failed to save image: " + e.getMessage());
+        }
+    }
+    
+    public Resource getBookImage(Long bookId) {
+        // Проверяем существование книги
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Book not found with id: " + bookId));
+        
+        // Проверяем наличие изображения
+        if (book.getImagePath() == null || book.getImagePath().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Image not found for book id: " + bookId);
+        }
+        
+        try {
+            Path imagePath = Paths.get(book.getImagePath());
+            Resource resource = new UrlResource(imagePath.toUri());
+            
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Image file not found or not readable");
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error reading image: " + e.getMessage());
         }
     }
 }
