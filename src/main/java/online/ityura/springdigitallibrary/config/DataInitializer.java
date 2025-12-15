@@ -105,7 +105,7 @@ public class DataInitializer implements CommandLineRunner {
                 new BookData("The Weekend Coder", "Alex Turner", "Stories and lessons learned from side projects and late-night debugging", 2019, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("Silence in the Open Space", "Alex Turner", "A short novel about burnout, focus, and finding meaning in routine work", 2021, Genre.PSYCHOLOGY),
                 new BookData("Data Structures for Humans", "Eugene Knuth", "Data structures explained with real-life metaphors and examples", 2017, Genre.EDUCATION),
-                new BookData("Complexity: A Love Story", "Eugene Knuth", "A nerdy and funny journey through Big-O and algorithmic tradeoffs", 2020, Genre.FOR_NERDS),
+                new BookData("Complexity. A Love Story", "Eugene Knuth", "A nerdy and funny journey through Big-O and algorithmic tradeoffs", 2020, Genre.FOR_NERDS),
                 new BookData("Dragons of the Northern Isles", "Lara Moon", "Fantasy adventure across icy seas and ancient ruins", 2016, Genre.FANTASY),
                 new BookData("The Wizard's Last Contract", "Lara Moon", "A mage signs a dangerous deal to save a kingdom", 2019, Genre.FANTASY),
                 new BookData("Mindset and Discipline", "Daniel Harper", "Practical techniques to build discipline and reduce procrastination", 2021, Genre.PSYCHOLOGY),
