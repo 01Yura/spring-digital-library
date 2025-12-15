@@ -12,13 +12,22 @@ import online.ityura.springdigitallibrary.repository.RatingRepository;
 import online.ityura.springdigitallibrary.repository.ReviewRepository;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -41,6 +50,12 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private RatingRepository ratingRepository;
 
+    @Autowired
+    private ResourceLoader resourceLoader;
+
+    @Value("${app.images.storage-path}")
+    private String storagePath;
+
     private final Random random = new Random();
 
     @Override
@@ -62,6 +77,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // Инициализация книг
         initializeBooks();
+        
+        // Обработка картинок из папки pictures
+        processBookImages();
         
         // Добавление смешных отзывов к каждой второй книге
         addFunnyReviews();
@@ -156,6 +174,141 @@ public class DataInitializer implements CommandLineRunner {
         
         // Сохраняем список книг для последующего добавления отзывов
         this.savedBooks = savedBooks;
+    }
+    
+    private void processBookImages() {
+        try {
+            // Получаем путь к папке pictures в resources
+            Resource picturesResource = resourceLoader.getResource("classpath:pictures");
+            Path picturesPath = null;
+            
+            try {
+                if (picturesResource.exists()) {
+                    // Пытаемся получить путь как файл (работает в IDE и при запуске из файловой системы)
+                    java.io.File file = picturesResource.getFile();
+                    if (file.exists() && file.isDirectory()) {
+                        picturesPath = file.toPath();
+                    }
+                }
+            } catch (Exception e) {
+                // Если не удалось получить как файл (например, в JAR), пробуем альтернативный путь
+            }
+            
+            // Альтернативный способ получения пути (для разработки)
+            if (picturesPath == null || !Files.exists(picturesPath)) {
+                picturesPath = Paths.get("src/main/resources/pictures");
+                if (!Files.exists(picturesPath)) {
+                    System.out.println("Pictures directory not found. Skipping image processing.");
+                    return;
+                }
+            }
+            
+            // Создаем папку для хранения изображений если её нет
+            Path storageDir = Paths.get(storagePath);
+            if (!Files.exists(storageDir)) {
+                Files.createDirectories(storageDir);
+                System.out.println("Created storage directory: " + storagePath);
+            }
+            
+            // Получаем все книги из базы данных
+            List<Book> allBooks = bookRepository.findAll();
+            
+            AtomicInteger processedCount = new AtomicInteger(0);
+            AtomicInteger matchedCount = new AtomicInteger(0);
+            
+            // Проходим по всем файлам в папке pictures
+            if (Files.exists(picturesPath) && Files.isDirectory(picturesPath)) {
+                try (java.util.stream.Stream<Path> files = Files.list(picturesPath)) {
+                    files.filter(Files::isRegularFile)
+                        .forEach(imageFile -> {
+                        try {
+                            String imageFileName = imageFile.getFileName().toString();
+                            // Убираем расширение для сравнения
+                            String imageNameWithoutExt = imageFileName;
+                            int lastDotIndex = imageFileName.lastIndexOf('.');
+                            if (lastDotIndex > 0) {
+                                imageNameWithoutExt = imageFileName.substring(0, lastDotIndex);
+                            }
+                            
+                            // Нормализуем имя файла: заменяем _ на пробелы, приводим к нижнему регистру
+                            String normalizedImageName = imageNameWithoutExt
+                                .replaceAll("_", " ")
+                                .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
+                                .toLowerCase()
+                                .trim();
+                            
+                            // Ищем соответствующую книгу
+                            for (Book book : allBooks) {
+                                // Пропускаем книги, у которых уже есть изображение
+                                if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+                                    continue;
+                                }
+                                
+                                // Нормализуем название книги: приводим к нижнему регистру, нормализуем пробелы
+                                String bookTitleNormalized = book.getTitle()
+                                    .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
+                                    .toLowerCase()
+                                    .trim();
+                                
+                                // Сравниваем нормализованные имена
+                                if (normalizedImageName.equals(bookTitleNormalized)) {
+                                    try {
+                                        // Получаем расширение файла
+                                        String extension = "";
+                                        if (lastDotIndex > 0) {
+                                            extension = imageFileName.substring(lastDotIndex);
+                                        }
+                                        
+                                        // Формируем имя файла для сохранения (на основе названия книги)
+                                        // Заменяем пробелы на _, но сохраняем все символы включая русские
+                                        String sanitizedTitle = book.getTitle()
+                                            .replaceAll("\\s+", "_")
+                                            .replaceAll("[<>:\"|?*]", ""); // Удаляем только недопустимые символы для Windows/Linux
+                                        String targetFileName = sanitizedTitle + extension;
+                                        
+                                        // Путь для сохранения
+                                        Path targetPath = storageDir.resolve(targetFileName);
+                                        
+                                        // Если файл уже существует, добавляем UUID
+                                        if (Files.exists(targetPath)) {
+                                            String baseName = sanitizedTitle;
+                                            String uuid = java.util.UUID.randomUUID().toString().substring(0, 8);
+                                            targetFileName = baseName + "_" + uuid + extension;
+                                            targetPath = storageDir.resolve(targetFileName);
+                                        }
+                                        
+                                        // Копируем файл
+                                        Files.copy(imageFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                                        
+                                        // Обновляем путь к изображению в базе данных
+                                        book.setImagePath(targetPath.toString());
+                                        bookRepository.save(book);
+                                        
+                                        System.out.println("Matched and copied image for book: " + book.getTitle() + " -> " + targetFileName);
+                                        matchedCount.incrementAndGet();
+                                        
+                                    } catch (IOException e) {
+                                        System.err.println("Failed to copy image for book " + book.getTitle() + ": " + e.getMessage());
+                                    }
+                                    break; // Нашли соответствие, переходим к следующему файлу
+                                }
+                            }
+                            processedCount.incrementAndGet();
+                        } catch (Exception e) {
+                            System.err.println("Error processing image file " + imageFile.getFileName() + ": " + e.getMessage());
+                        }
+                    });
+                } catch (IOException e) {
+                    System.err.println("Error listing files in pictures directory: " + e.getMessage());
+                }
+            }
+            
+            System.out.println("Image processing completed: " + processedCount.get() + " files processed, " + matchedCount.get() + " images matched and copied.");
+            
+        } catch (Exception e) {
+            System.err.println("Error during image processing: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private List<Book> savedBooks;
