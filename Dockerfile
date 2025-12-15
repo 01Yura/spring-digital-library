@@ -20,6 +20,12 @@ RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
+# Создаем директорию для хранения изображений книг
+# Делаем это до переключения на пользователя spring, чтобы иметь права на создание директории
+# Если volume будет смонтирован, эта директория будет использована как точка монтирования
+RUN mkdir -p /opt/spring-digital-bookstore/pictures && \
+    chown -R spring:spring /opt/spring-digital-bookstore
+
 # Копируем JAR файл из этапа сборки
 COPY --from=build /app/target/spring-digital-library-*.jar app.jar
 
