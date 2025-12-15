@@ -2,7 +2,9 @@ package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.request.CreateReviewRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateReviewRequest;
+import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.dto.response.ReviewResponse;
+import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,8 +48,21 @@ public class ReviewController {
                     description = "Отзыв успешно создан",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Книга не найдена"),
-            @ApiResponse(responseCode = "409", description = "Отзыв уже существует для этой книги")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Отзыв уже существует для этой книги",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @PostMapping
     public ResponseEntity<ReviewResponse> createReview(
@@ -70,7 +85,16 @@ public class ReviewController {
                     description = "Отзыв успешно обновлен",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Отзыв не найден")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Отзыв не найден",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @PutMapping("/my")
     public ResponseEntity<ReviewResponse> updateMyReview(
@@ -113,7 +137,16 @@ public class ReviewController {
                     description = "Отзыв найден",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Отзыв не найден")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Отзыв не найден",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @GetMapping("/my")
     public ResponseEntity<ReviewResponse> getMyReview(

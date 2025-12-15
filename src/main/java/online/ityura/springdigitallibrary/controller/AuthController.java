@@ -4,7 +4,9 @@ import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
+import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
+import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,8 +43,16 @@ public class AuthController {
                             examples = @ExampleObject(value = "{\"userId\":1,\"email\":\"user@example.com\",\"role\":\"USER\"}")
                     )
             ),
-            @ApiResponse(responseCode = "400", description = "Неверный формат данных"),
-            @ApiResponse(responseCode = "409", description = "Email уже существует")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Email уже существует",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -64,8 +74,16 @@ public class AuthController {
                             examples = @ExampleObject(value = "{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"refreshToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"tokenType\":\"Bearer\"}")
                     )
             ),
-            @ApiResponse(responseCode = "401", description = "Неверные учетные данные"),
-            @ApiResponse(responseCode = "400", description = "Неверный формат данных")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Неверные учетные данные",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            )
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -88,8 +106,16 @@ public class AuthController {
                             examples = @ExampleObject(value = "{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"refreshToken\":\"eyJhbGciOiJIUzI1NiJ9...\",\"tokenType\":\"Bearer\"}")
                     )
             ),
-            @ApiResponse(responseCode = "400", description = "Неверный формат данных"),
-            @ApiResponse(responseCode = "401", description = "Refresh токен недействителен или истек")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Refresh токен недействителен или истек",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {

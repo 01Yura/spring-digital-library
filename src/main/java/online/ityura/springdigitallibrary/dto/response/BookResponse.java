@@ -24,6 +24,7 @@ public class BookResponse {
     private BigDecimal ratingAvg;
     private Integer ratingCount;
     private Boolean hasFile;
+    private String imagePath;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ReviewResponse> reviews;

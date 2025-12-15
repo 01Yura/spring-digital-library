@@ -2,7 +2,9 @@ package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.request.CreateRatingRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateRatingRequest;
+import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.dto.response.RatingResponse;
+import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.RatingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,9 +46,21 @@ public class RatingController {
                     description = "Рейтинг успешно создан",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = RatingResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Неверное значение рейтинга (должно быть 1-10)"),
-            @ApiResponse(responseCode = "404", description = "Книга не найдена"),
-            @ApiResponse(responseCode = "409", description = "Рейтинг уже существует для этой книги")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверное значение рейтинга (должно быть 1-10)",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Рейтинг уже существует для этой книги",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @PostMapping
     public ResponseEntity<RatingResponse> createRating(
@@ -70,8 +84,16 @@ public class RatingController {
                     description = "Рейтинг успешно обновлен",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = RatingResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Неверное значение рейтинга"),
-            @ApiResponse(responseCode = "404", description = "Рейтинг не найден")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверное значение рейтинга",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Рейтинг не найден",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @PutMapping("/my")
     public ResponseEntity<RatingResponse> updateMyRating(

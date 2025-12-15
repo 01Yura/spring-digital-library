@@ -1,9 +1,11 @@
 package online.ityura.springdigitallibrary.controller;
 
+import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.service.BookFileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,8 +39,16 @@ public class BookFileController {
                     description = "PDF файл успешно загружен",
                     content = @Content(mediaType = "application/pdf")
             ),
-            @ApiResponse(responseCode = "404", description = "Книга или файл не найдены"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован")
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга или файл не найдены",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Не авторизован",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @GetMapping("/download")
     public ResponseEntity<Resource> downloadBook(

@@ -1,6 +1,7 @@
 package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.response.BookResponse;
+import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -64,7 +65,11 @@ public class BookController {
                     description = "Информация о книге получена",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Книга не найдена")
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
     })
     @SecurityRequirements
     @GetMapping("/{bookId}")

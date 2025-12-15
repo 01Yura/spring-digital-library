@@ -52,6 +52,9 @@ public class Book {
     @Builder.Default
     private Integer ratingCount = 0;
     
+    @Column(name = "image_path")
+    private String imagePath;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     

@@ -225,6 +225,7 @@ public class AdminBookService {
                 .ratingAvg(book.getRatingAvg())
                 .ratingCount(book.getRatingCount())
                 .hasFile(hasFile)
+                .imagePath(book.getImagePath())
                 .createdAt(book.getCreatedAt())
                 .updatedAt(book.getUpdatedAt())
                 .build();
