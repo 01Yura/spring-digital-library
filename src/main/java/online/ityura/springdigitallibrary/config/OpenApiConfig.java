@@ -32,7 +32,9 @@ public class OpenApiConfig {
                                 "&nbsp;&nbsp;<b>IP:</b> 176.126.103.46<br>" +
                                 "&nbsp;&nbsp;<b>Database:</b> spring_digital_bookstore<br>" +
                                 "&nbsp;&nbsp;<b>Username:</b> readonly_user<br>" +
-                                "&nbsp;&nbsp;<b>Password:</b> pass_123_XYZ!")
+                                "&nbsp;&nbsp;<b>Password:</b> pass_123_XYZ!<br><br>" +
+
+                                "В БД в колонке password_hash пароль хранится в открытом виде УМЫШЛЕННО, так что если вы забыли свой пароль, то можно зайти руками в БД и посмотреть.")
                         .contact(new Contact()
                                 .name("Developer contact")
                                 .url("https://github.com/01Yura"))
