@@ -40,6 +40,7 @@ services:
   # Spring Boot приложение
   app:
     image: 01yura/spring-digital-bookstore:latest
+    pull_policy: always
     container_name: spring-digital-bookstore-app
     environment:
       # Настройки подключения к БД
