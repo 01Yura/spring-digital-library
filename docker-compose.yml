@@ -12,7 +12,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Хранение данных БД на хосте в /opt/spring-digital-bookstore/postgres_data
+      - /opt/spring-digital-bookstore/postgres_data:/var/lib/postgresql/data
     networks:
       - spring-library-network
     healthcheck:
@@ -21,21 +22,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-  # Init контейнер для установки прав доступа к volume с изображениями
-  app-init:
-    image: alpine:latest
-    container_name: spring-digital-bookstore-init
-    volumes:
-      - book_images:/opt/spring-digital-bookstore/pictures
-    command: >
-      sh -c "
-        mkdir -p /opt/spring-digital-bookstore/pictures &&
-        chown -R 1000:1000 /opt/spring-digital-bookstore/pictures &&
-        chmod -R 755 /opt/spring-digital-bookstore/pictures
-      "
-    user: root
-    restart: "no"
 
   # Spring Boot приложение
   app:
@@ -73,23 +59,15 @@ services:
     ports:
       - "8088:8080"
     volumes:
-      # Volume для хранения изображений книг (сохраняется между перезапусками контейнера)
-      - book_images:/opt/spring-digital-bookstore/pictures
+      # Хранение изображений книг в обычной директории на хосте
+      - /opt/spring-digital-bookstore/pictures:/opt/spring-digital-bookstore/pictures
     networks:
       - spring-library-network
     depends_on:
       postgres:
         condition: service_healthy
-      app-init:
-        condition: service_started
     restart: unless-stopped
 
 networks:
   spring-library-network:
     driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
-  book_images:
-    driver: local

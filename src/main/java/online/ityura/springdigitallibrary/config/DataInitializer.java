@@ -191,10 +191,19 @@ public class DataInitializer implements CommandLineRunner {
                     }
                 }
             } catch (Exception e) {
-                // Если не удалось получить как файл (например, в JAR), пробуем альтернативный путь
+                // Если не удалось получить как файл (например, в JAR), пробуем альтернативные пути
             }
             
-            // Альтернативный способ получения пути (для разработки)
+            // Альтернативный путь для работы внутри Docker-контейнера:
+            // в Dockerfile мы копируем исходные картинки в /opt/spring-digital-bookstore/pictures-source
+            if (picturesPath == null || !Files.exists(picturesPath)) {
+                Path dockerPicturesPath = Paths.get("/opt/spring-digital-bookstore/pictures-source");
+                if (Files.exists(dockerPicturesPath) && Files.isDirectory(dockerPicturesPath)) {
+                    picturesPath = dockerPicturesPath;
+                }
+            }
+            
+            // Альтернативный способ получения пути для разработки (IDE / локальный запуск)
             if (picturesPath == null || !Files.exists(picturesPath)) {
                 picturesPath = Paths.get("src/main/resources/pictures");
                 if (!Files.exists(picturesPath)) {
