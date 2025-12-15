@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -143,6 +144,121 @@ public class AdminBookController {
             @PathVariable Long bookId,
             @Valid @RequestBody UpdateBookRequest request) {
         BookResponse response = adminBookService.updateBook(bookId, request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @Operation(
+            summary = "Частично обновить информацию о книге (JSON)",
+            description = "Частично обновляет информацию о существующей книге. Все поля опциональны. " +
+                    "При изменении title или author проверяется уникальность. " +
+                    "Для обновления изображения используйте PATCH с multipart/form-data. " +
+                    "Требуется роль ADMIN."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Книга успешно обновлена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Недостаточно прав",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Конфликт уникальности",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
+    })
+    @PatchMapping(value = "/{bookId}", consumes = "application/json")
+    public ResponseEntity<BookResponse> patchBook(
+            @Parameter(description = "ID книги", example = "1", required = true)
+            @PathVariable Long bookId,
+            @Valid @RequestBody UpdateBookRequest request) {
+        BookResponse response = adminBookService.patchBook(bookId, request, null);
+        return ResponseEntity.ok(response);
+    }
+    
+    @Operation(
+            summary = "Частично обновить информацию о книге с изображением (multipart/form-data)",
+            description = "Частично обновляет информацию о существующей книге и/или изображение. " +
+                    "Все поля опциональны. Можно обновить только поля, только изображение, или и то и другое. " +
+                    "При изменении title или author проверяется уникальность. " +
+                    "Изображение должно быть в формате multipart/form-data, размером не более 5MB. " +
+                    "Требуется роль ADMIN."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Книга успешно обновлена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат данных или файл слишком большой",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Недостаточно прав",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Конфликт уникальности",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+            )
+    })
+    @PatchMapping(value = "/{bookId}", consumes = "multipart/form-data")
+    public ResponseEntity<BookResponse> patchBookWithImage(
+            @Parameter(description = "ID книги", example = "1", required = true)
+            @PathVariable Long bookId,
+            @Parameter(description = "Название книги", required = false)
+            @RequestParam(value = "title", required = false) String title,
+            @Parameter(description = "Полное имя автора", required = false)
+            @RequestParam(value = "authorName", required = false) String authorName,
+            @Parameter(description = "Описание книги", required = false)
+            @RequestParam(value = "description", required = false) String description,
+            @Parameter(description = "Год публикации", required = false)
+            @RequestParam(value = "publishedYear", required = false) Integer publishedYear,
+            @Parameter(description = "Жанр книги", required = false)
+            @RequestParam(value = "genre", required = false) String genre,
+            @Parameter(description = "Файл изображения", required = false)
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        
+        // Создаем UpdateBookRequest из параметров
+        UpdateBookRequest request = new UpdateBookRequest();
+        request.setTitle(title);
+        request.setAuthorName(authorName);
+        request.setDescription(description);
+        request.setPublishedYear(publishedYear);
+        if (genre != null && !genre.isEmpty()) {
+            try {
+                request.setGenre(online.ityura.springdigitallibrary.model.Genre.valueOf(genre.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, 
+                        "Invalid genre: " + genre);
+            }
+        }
+        
+        BookResponse response = adminBookService.patchBook(bookId, request, image);
         return ResponseEntity.ok(response);
     }
     

@@ -10,10 +10,12 @@ import online.ityura.springdigitallibrary.repository.AuthorRepository;
 import online.ityura.springdigitallibrary.repository.BookFileRepository;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import online.ityura.springdigitallibrary.repository.ReviewRepository;
+import online.ityura.springdigitallibrary.service.BookImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -33,6 +35,9 @@ public class AdminBookService {
     
     @Autowired
     private ReviewRepository reviewRepository;
+    
+    @Autowired
+    private BookImageService bookImageService;
     
     @Transactional
     public BookResponse createBook(CreateBookRequest request) {
@@ -146,6 +151,24 @@ public class AdminBookService {
         
         book = bookRepository.save(book);
         return mapToBookResponse(book);
+    }
+    
+    @Transactional
+    public BookResponse patchBook(Long bookId, UpdateBookRequest request, MultipartFile imageFile) {
+        // Сначала обновляем поля книги
+        BookResponse response = updateBook(bookId, request);
+        
+        // Если передан файл изображения, обновляем изображение
+        if (imageFile != null && !imageFile.isEmpty()) {
+            bookImageService.uploadBookImage(bookId, imageFile);
+            // Получаем обновленную книгу для возврата
+            Book book = bookRepository.findByIdWithAuthor(bookId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                            "Book not found with id: " + bookId));
+            return mapToBookResponse(book);
+        }
+        
+        return response;
     }
     
     @Transactional
