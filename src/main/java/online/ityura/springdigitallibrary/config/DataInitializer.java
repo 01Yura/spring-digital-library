@@ -277,17 +277,14 @@ public class DataInitializer implements CommandLineRunner {
                                         
                                         // Путь для сохранения
                                         Path targetPath = storageDir.resolve(targetFileName);
-                                        
-                                        // Если файл уже существует, добавляем UUID
+
+                                        // Если файл уже существует, не копируем заново и не меняем имя
                                         if (Files.exists(targetPath)) {
-                                            String baseName = sanitizedTitle;
-                                            String uuid = java.util.UUID.randomUUID().toString().substring(0, 8);
-                                            targetFileName = baseName + "_" + uuid + extension;
-                                            targetPath = storageDir.resolve(targetFileName);
+                                            System.out.println("Image file already exists, skipping copy: " + targetFileName);
+                                        } else {
+                                            // Копируем файл (создаем новый)
+                                            Files.copy(imageFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
                                         }
-                                        
-                                        // Копируем файл
-                                        Files.copy(imageFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
                                         
                                         // Обновляем путь к изображению в базе данных
                                         book.setImagePath(targetPath.toString());
