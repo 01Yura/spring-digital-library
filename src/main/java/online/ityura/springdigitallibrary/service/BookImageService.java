@@ -4,6 +4,7 @@ import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -13,11 +14,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class BookImageService {
@@ -131,6 +136,67 @@ public class BookImageService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
                     "Error reading image: " + e.getMessage());
+        }
+    }
+    
+    public Resource getAllBookImagesAsZip() {
+        try {
+            // Получаем все книги с изображениями
+            List<Book> booksWithImages = bookRepository.findAllWithImages();
+            
+            if (booksWithImages.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "No books with images found");
+            }
+            
+            // Создаем временный ZIP файл
+            Path zipPath = Files.createTempFile("book-images-", ".zip");
+            
+            try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+                for (Book book : booksWithImages) {
+                    if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+                        try {
+                            Path imagePath = Paths.get(book.getImagePath());
+                            if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
+                                // Получаем имя файла из пути
+                                String fileName = imagePath.getFileName().toString();
+                                // Используем ID книги и название для уникальности имени в ZIP
+                                String zipEntryName = book.getId() + "_" + fileName;
+                                
+                                ZipEntry zipEntry = new ZipEntry(zipEntryName);
+                                zos.putNextEntry(zipEntry);
+                                
+                                // Копируем содержимое файла в ZIP
+                                try (InputStream is = Files.newInputStream(imagePath)) {
+                                    byte[] buffer = new byte[8192];
+                                    int length;
+                                    while ((length = is.read(buffer)) > 0) {
+                                        zos.write(buffer, 0, length);
+                                    }
+                                }
+                                
+                                zos.closeEntry();
+                            }
+                        } catch (IOException e) {
+                            // Пропускаем файлы, которые не удалось прочитать
+                            System.err.println("Failed to add image for book " + book.getId() + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
+            
+            // Читаем содержимое ZIP файла в байтовый массив
+            byte[] zipBytes = Files.readAllBytes(zipPath);
+            
+            // Удаляем временный файл
+            Files.deleteIfExists(zipPath);
+            
+            // Создаем Resource из байтового массива
+            return new ByteArrayResource(zipBytes);
+            
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "Error creating ZIP archive: " + e.getMessage());
         }
     }
 }

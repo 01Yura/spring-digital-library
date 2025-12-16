@@ -19,5 +19,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     
     @Query("SELECT b FROM Book b WHERE b.author.id = :authorId")
     List<Book> findByAuthorId(@Param("authorId") Long authorId);
+    
+    @Query("SELECT b FROM Book b WHERE b.imagePath IS NOT NULL AND b.imagePath != ''")
+    List<Book> findAllWithImages();
 }
 

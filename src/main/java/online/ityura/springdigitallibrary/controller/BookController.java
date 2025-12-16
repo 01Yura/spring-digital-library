@@ -152,5 +152,38 @@ public class BookController {
                 .contentType(mediaType)
                 .body(resource);
     }
+    
+    @Operation(
+            summary = "Получить все изображения книг в ZIP архиве",
+            description = "Возвращает ZIP архив со всеми изображениями книг, у которых есть изображение. " +
+                    "Каждое изображение в архиве имеет имя в формате: {bookId}_{originalFileName}. " +
+                    "Доступно без авторизации."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ZIP архив успешно создан",
+                    content = @Content(mediaType = "application/zip")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Не найдено книг с изображениями",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"No books with images found\"}")
+                    )
+            )
+    })
+    @SecurityRequirements
+    @GetMapping("/images/all")
+    public ResponseEntity<Resource> getAllBookImages() {
+        Resource resource = bookImageService.getAllBookImagesAsZip();
+        
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"book-images.zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
 }
 
