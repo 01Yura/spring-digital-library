@@ -1,12 +1,5 @@
 package online.ityura.springdigitallibrary.controller;
 
-import online.ityura.springdigitallibrary.dto.request.CreateBookRequest;
-import online.ityura.springdigitallibrary.dto.request.UpdateBookRequest;
-import online.ityura.springdigitallibrary.dto.response.BookResponse;
-import online.ityura.springdigitallibrary.dto.response.MessageResponse;
-import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
-import online.ityura.springdigitallibrary.service.AdminBookService;
-import online.ityura.springdigitallibrary.service.BookImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,7 +10,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import online.ityura.springdigitallibrary.dto.request.CreateBookRequest;
+import online.ityura.springdigitallibrary.dto.request.UpdateBookRequest;
+import online.ityura.springdigitallibrary.dto.response.BookResponse;
+import online.ityura.springdigitallibrary.dto.response.MessageResponse;
+import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
+import online.ityura.springdigitallibrary.service.AdminBookService;
+import online.ityura.springdigitallibrary.service.BookImageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,14 +30,13 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/books")
 @Tag(name = "Администрирование книг", description = "API для управления книгами (требуется роль ADMIN)")
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor
 public class AdminBookController {
-    
-    @Autowired
-    private AdminBookService adminBookService;
-    
-    @Autowired
-    private BookImageService bookImageService;
-    
+
+    private final AdminBookService adminBookService;
+
+    private final BookImageService bookImageService;
+
     @Operation(
             summary = "Создать новую книгу",
             description = "Создает новую книгу в каталоге. Автор будет создан автоматически, если его еще нет. " +
@@ -78,7 +77,7 @@ public class AdminBookController {
         BookResponse response = adminBookService.createBook(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
+
     @Operation(
             summary = "Создать несколько книг одновременно",
             description = "Создает несколько книг в каталоге за один запрос. Передайте массив объектов CreateBookRequest. " +
@@ -122,7 +121,7 @@ public class AdminBookController {
         List<BookResponse> responses = adminBookService.createBooks(requests);
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
-    
+
     @Operation(
             summary = "Обновить информацию о книге",
             description = "Обновляет информацию о существующей книге. Все поля опциональны. " +
@@ -175,7 +174,7 @@ public class AdminBookController {
         BookResponse response = adminBookService.updateBook(bookId, request);
         return ResponseEntity.ok(response);
     }
-    
+
     @Operation(
             summary = "Частично обновить информацию о книге (JSON)",
             description = "Частично обновляет информацию о существующей книге. Все поля опциональны. " +
@@ -230,7 +229,7 @@ public class AdminBookController {
         BookResponse response = adminBookService.patchBook(bookId, request, null);
         return ResponseEntity.ok(response);
     }
-    
+
     @Operation(
             summary = "Частично обновить информацию о книге с изображением (multipart/form-data)",
             description = "Частично обновляет информацию о существующей книге и/или изображение. " +
@@ -294,7 +293,7 @@ public class AdminBookController {
             @RequestParam(value = "genre", required = false) String genre,
             @Parameter(description = "Файл изображения", required = false)
             @RequestParam(value = "image", required = false) MultipartFile image) {
-        
+
         // Создаем UpdateBookRequest из параметров
         UpdateBookRequest request = new UpdateBookRequest();
         request.setTitle(title);
@@ -306,15 +305,15 @@ public class AdminBookController {
                 request.setGenre(online.ityura.springdigitallibrary.model.Genre.valueOf(genre.toUpperCase()));
             } catch (IllegalArgumentException e) {
                 throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, 
+                        HttpStatus.BAD_REQUEST,
                         "Invalid genre: " + genre);
             }
         }
-        
+
         BookResponse response = adminBookService.patchBook(bookId, request, image);
         return ResponseEntity.ok(response);
     }
-    
+
     @Operation(
             summary = "Удалить книгу",
             description = "Удаляет книгу из каталога. Удаление запрещено, если: " +
@@ -348,7 +347,7 @@ public class AdminBookController {
         adminBookService.deleteBook(bookId);
         return ResponseEntity.noContent().build();
     }
-    
+
     @Operation(
             summary = "Удалить автора и все его книги",
             description = "Удаляет автора и все его книги из каталога. " +
@@ -394,7 +393,7 @@ public class AdminBookController {
         adminBookService.deleteAuthorAndAllBooks(authorId);
         return ResponseEntity.noContent().build();
     }
-    
+
     @Operation(
             summary = "Загрузить изображение для книги",
             description = "Загружает изображение для указанной книги. " +

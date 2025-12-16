@@ -14,8 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,13 +29,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/books")
 @Tag(name = "Книги", description = "API для работы с книгами (доступно без авторизации)")
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor
 public class BookController {
     
-    @Autowired
-    private BookService bookService;
+    private final BookService bookService;
     
-    @Autowired
-    private BookImageService bookImageService;
+    private final BookImageService bookImageService;
     
     @Operation(
             summary = "Получить список книг",

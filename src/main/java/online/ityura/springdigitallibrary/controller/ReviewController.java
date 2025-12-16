@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -30,13 +30,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/books/{bookId}/reviews")
 @Tag(name = "Отзывы", description = "API для управления отзывами на книги")
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor
 public class ReviewController {
     
-    @Autowired
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
     
-    @Autowired
-    private online.ityura.springdigitallibrary.repository.UserRepository userRepository;
+    private final online.ityura.springdigitallibrary.repository.UserRepository userRepository;
     
     @Operation(
             summary = "Создать отзыв на книгу",

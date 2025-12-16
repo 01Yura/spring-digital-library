@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Аутентификация", description = "API для регистрации и входа в систему (JWT access token и refresh токены)")
+@RequiredArgsConstructor
 public class AuthController {
     
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
     
     @Operation(
             summary = "Регистрация нового пользователя",
@@ -49,7 +49,7 @@ public class AuthController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"nickname\":\"Nickname must contain only letters, digits, dashes, underscores, and dots. Spaces and other special characters are not allowed\",\"password\":\"Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long\"}}")
+                            examples = @ExampleObject(value = "{\"errors\":{\"password\":\"Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long\",\"nickname\":\"Nickname must contain only letters, digits, dashes, underscores, and dots. Spaces and other special characters are not allowed\",\"email\":\"Email should be valid\"}}")
                     )
             ),
             @ApiResponse(

@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,10 +25,10 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping("/api/v1/books/{bookId}")
 @Tag(name = "Файлы книг", description = "API для скачивания PDF файлов книг (пока не реализован!)")
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor
 public class BookFileController {
     
-    @Autowired
-    private BookFileService bookFileService;
+    private final BookFileService bookFileService;
     
     @Operation(
             summary = "Скачать PDF файл книги",
