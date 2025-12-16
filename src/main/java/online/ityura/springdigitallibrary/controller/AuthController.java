@@ -110,7 +110,7 @@ public class AuthController {
     @Operation(
             summary = "Обновить access токен",
             description = "Обновляет access токен используя refresh токен. Возвращает новую пару access и refresh токенов. " +
-                    "Refresh токен действителен 24 часа. При указании некорректного, истекшего или невалидного refresh токена возвращается ошибка 401 Unauthorized."
+                    "Refresh токен действителен 24 часа."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -124,33 +124,16 @@ public class AuthController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных (отсутствует refresh токен или не соответствует требованиям валидации)",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"refreshToken\":\"Refresh token is required\"}}")
-                    )
+                    description = "Неверный формат данных",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "Refresh токен недействителен, истек, имеет неверный формат, не является refresh токеном или пользователь не найден",
+                    description = "Refresh токен недействителен или истек",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = MessageResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Невалидный токен",
-                                            value = "{\"message\":\"Invalid refresh token\"}"
-                                    ),
-                                    @ExampleObject(
-                                            name = "Истекший токен",
-                                            value = "{\"message\":\"Refresh token is expired or invalid\"}"
-                                    ),
-                                    @ExampleObject(
-                                            name = "Пользователь не найден",
-                                            value = "{\"message\":\"User not found\"}"
-                                    )
-                            }
+                            examples = @ExampleObject(value = "{\"message\":\"Refresh token is expired or invalid\"}")
                     )
             )
     })
