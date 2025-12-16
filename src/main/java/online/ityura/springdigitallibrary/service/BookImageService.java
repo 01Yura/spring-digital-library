@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.time.Instant;
 
 @Service
 public class BookImageService {
@@ -53,15 +54,6 @@ public class BookImageService {
                 Files.createDirectories(storageDir);
             }
             
-            // Генерируем имя файла на основе названия книги
-            // Удаляем пробелы в начале и конце, затем заменяем пробелы на _
-            String bookTitle = book.getTitle() != null ? book.getTitle().trim() : "";
-            if (bookTitle.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                        "Book title is empty, cannot generate image filename");
-            }
-            String sanitizedTitle = bookTitle.replaceAll("\\s+", "_");
-            
             // Получаем расширение файла из оригинального имени
             String originalFilename = file.getOriginalFilename();
             String extension = "";
@@ -69,35 +61,80 @@ public class BookImageService {
                 extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
             
-            // Формируем имя файла: название_книги.расширение
-            String filename = sanitizedTitle + extension;
+            String filename;
+            Path filePath;
             
-            // Если файл с таким именем уже существует, добавляем UUID
-            Path filePath = storageDir.resolve(filename);
-            if (Files.exists(filePath)) {
-                String baseName = sanitizedTitle;
-                filename = baseName + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+            // Проверяем, есть ли у книги уже изображение
+            if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+                // Если есть старое изображение, переименовываем его с timestamp
+                Path oldImagePath = Paths.get(book.getImagePath());
+                if (Files.exists(oldImagePath)) {
+                    // Получаем имя старого файла (без пути)
+                    String oldFileName = oldImagePath.getFileName().toString();
+                    
+                    // Извлекаем базовое имя и расширение из старого файла
+                    String oldBaseName;
+                    String oldExtension = "";
+                    if (oldFileName.contains(".")) {
+                        int lastDotIndex = oldFileName.lastIndexOf(".");
+                        oldBaseName = oldFileName.substring(0, lastDotIndex);
+                        oldExtension = oldFileName.substring(lastDotIndex);
+                    } else {
+                        oldBaseName = oldFileName;
+                    }
+                    
+                    // Если расширение не было в старом файле, используем расширение нового файла
+                    if (oldExtension.isEmpty() && !extension.isEmpty()) {
+                        oldExtension = extension;
+                    }
+                    
+                    // Переименовываем старое изображение, добавляя timestamp
+                    long timestamp = Instant.now().toEpochMilli();
+                    String oldFileNameWithTimestamp = oldBaseName + "_" + timestamp + oldExtension;
+                    Path oldImagePathWithTimestamp = storageDir.resolve(oldFileNameWithTimestamp);
+                    
+                    try {
+                        Files.move(oldImagePath, oldImagePathWithTimestamp, StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        // Логируем ошибку, но не прерываем выполнение
+                        System.err.println("Failed to rename old image: " + e.getMessage());
+                    }
+                    
+                    // Новое изображение сохраняем с именем старого
+                    filename = oldFileName;
+                    filePath = storageDir.resolve(filename);
+                } else {
+                    // Старое изображение не существует на диске, используем его имя для нового
+                    String oldFileName = oldImagePath.getFileName().toString();
+                    filename = oldFileName;
+                    filePath = storageDir.resolve(filename);
+                }
+            } else {
+                // Если у книги нет изображения, генерируем имя на основе названия книги
+                String bookTitle = book.getTitle() != null ? book.getTitle().trim() : "";
+                if (bookTitle.isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                            "Book title is empty, cannot generate image filename");
+                }
+                String sanitizedTitle = bookTitle.replaceAll("\\s+", "_");
+                
+                // Формируем имя файла: название_книги.расширение
+                filename = sanitizedTitle + extension;
                 filePath = storageDir.resolve(filename);
+                
+                // Если файл с таким именем уже существует, добавляем UUID
+                if (Files.exists(filePath)) {
+                    String baseName = sanitizedTitle;
+                    filename = baseName + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+                    filePath = storageDir.resolve(filename);
+                }
             }
             
-            // Сохраняем файл
+            // Сохраняем новый файл
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             
             // Формируем полный путь для сохранения в БД
             String imagePath = filePath.toString();
-            
-            // Удаляем старое изображение если оно существует
-            if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
-                try {
-                    Path oldImagePath = Paths.get(book.getImagePath());
-                    if (Files.exists(oldImagePath)) {
-                        Files.delete(oldImagePath);
-                    }
-                } catch (IOException e) {
-                    // Логируем ошибку, но не прерываем выполнение
-                    System.err.println("Failed to delete old image: " + e.getMessage());
-                }
-            }
             
             // Обновляем путь к изображению в базе данных
             book.setImagePath(imagePath);
