@@ -50,6 +50,8 @@ public class SecurityConfig {
                     "/webjars/**",
                     "/swagger-ui/index.html"
                 ).permitAll()
+                // TODO: ВРЕМЕННО ОТКРЫТО БЕЗ АВТОРИЗАЦИИ - убрать эту строку для возврата требования авторизации
+                .requestMatchers("/api/v1/admin/books/*/image").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/books").permitAll()
                 .requestMatchers("/api/v1/books/*").permitAll()

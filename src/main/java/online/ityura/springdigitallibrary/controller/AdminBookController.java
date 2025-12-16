@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -394,12 +395,12 @@ public class AdminBookController {
         return ResponseEntity.noContent().build();
     }
 
+    // TODO: ВРЕМЕННО ОТКРЫТО БЕЗ АВТОРИЗАЦИИ - убрать @SecurityRequirements и вернуть требование авторизации
     @Operation(
-            summary = "Загрузить изображение для книги",
+            summary = "Загрузить изображение для книги (ВРЕМЕННО ДОСТУПНО БЕЗ АВТОРИЗАЦИИ)",
             description = "Загружает изображение для указанной книги. " +
                     "Изображение должно быть в формате multipart/form-data, размером не более 5MB. " +
-                    "Имя файла в хранилище будет сгенерировано на основе названия книги (пробелы заменяются на _). " +
-                    "Требуется роль ADMIN."
+                    "Имя файла в хранилище будет сгенерировано на основе названия книги (пробелы заменяются на _). "
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -439,6 +440,7 @@ public class AdminBookController {
                     )
             )
     })
+    @SecurityRequirements // TODO: ВРЕМЕННО - убрать эту аннотацию для возврата требования авторизации
     @PostMapping(value = "/{bookId}/image", consumes = "multipart/form-data")
     public ResponseEntity<MessageResponse> uploadBookImage(
             @Parameter(description = "ID книги", example = "1", required = true)
