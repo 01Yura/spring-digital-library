@@ -17,8 +17,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -122,21 +124,45 @@ public class ReviewController {
     
     @Operation(
             summary = "Получить список отзывов на книгу",
-            description = "Возвращает пагинированный список всех отзывов на указанную книгу, отсортированных по дате создания (новые первыми)."
+            description = "Возвращает пагинированный список всех отзывов на указанную книгу с возможностью сортировки. " +
+                    "Параметры пагинации: `page` (номер страницы, по умолчанию 0), `size` (размер страницы, по умолчанию 20), " +
+                    "`sort` (сортировка, по умолчанию `createdAt,desc` - новые первыми). " +
+                    "Доступные поля для сортировки: `createdAt` (дата создания), `updatedAt` (дата обновления). " +
+                    "Примеры: `createdAt,desc`, `createdAt,asc`, `updatedAt,desc`."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Список отзывов получен",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена или отзывы отсутствуют",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Book not found",
+                                            value = "{\"message\":\"Book not found with id: 1\"}",
+                                            summary = "Книга не найдена"
+                                    ),
+                                    @ExampleObject(
+                                            name = "No reviews found",
+                                            value = "{\"message\":\"No reviews found for book with id: 1\"}",
+                                            summary = "Отзывы отсутствуют"
+                                    )
+                            }
+                    )
             )
     })
     @GetMapping
     public ResponseEntity<Page<ReviewResponse>> getReviews(
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId,
-            @Parameter(description = "Параметры пагинации")
-            @PageableDefault(size = 20) Pageable pageable) {
+            @ParameterObject
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(reviewService.getReviewsByBookId(bookId, pageable));
     }
     
