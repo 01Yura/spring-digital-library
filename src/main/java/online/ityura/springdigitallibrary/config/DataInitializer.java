@@ -1,16 +1,7 @@
 package online.ityura.springdigitallibrary.config;
 
-import online.ityura.springdigitallibrary.model.Author;
-import online.ityura.springdigitallibrary.model.Book;
-import online.ityura.springdigitallibrary.model.Genre;
-import online.ityura.springdigitallibrary.model.Rating;
-import online.ityura.springdigitallibrary.model.Review;
-import online.ityura.springdigitallibrary.model.User;
-import online.ityura.springdigitallibrary.repository.AuthorRepository;
-import online.ityura.springdigitallibrary.repository.BookRepository;
-import online.ityura.springdigitallibrary.repository.RatingRepository;
-import online.ityura.springdigitallibrary.repository.ReviewRepository;
-import online.ityura.springdigitallibrary.repository.UserRepository;
+import online.ityura.springdigitallibrary.model.*;
+import online.ityura.springdigitallibrary.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -32,31 +23,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
+    private final Random random = new Random();
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private BookRepository bookRepository;
-
     @Autowired
     private AuthorRepository authorRepository;
-
     @Autowired
     private ReviewRepository reviewRepository;
-
     @Autowired
     private RatingRepository ratingRepository;
-
     @Autowired
     private ResourceLoader resourceLoader;
-
     @Value("${app.images.storage-path}")
     private String storagePath;
-
-    private final Random random = new Random();
+    private List<Book> savedBooks;
 
     @Override
     public void run(String... args) throws Exception {
@@ -77,10 +61,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Инициализация книг
         initializeBooks();
-        
+
         // Обработка картинок из папки pictures
         processBookImages();
-        
+
         // Добавление смешных отзывов к каждой второй книге
         addFunnyReviews();
     }
@@ -256,24 +240,24 @@ public class DataInitializer implements CommandLineRunner {
                         .orElse(null);
                 existingCount++;
             }
-            
+
             if (book != null) {
                 savedBooks.add(book);
             }
         }
 
         System.out.println("Books initialization completed: " + createdCount + " created, " + existingCount + " already exist.");
-        
+
         // Сохраняем список книг для последующего добавления отзывов
         this.savedBooks = savedBooks;
     }
-    
+
     private void processBookImages() {
         try {
             // Получаем путь к папке pictures в resources
             Resource picturesResource = resourceLoader.getResource("classpath:pictures");
             Path picturesPath = null;
-            
+
             try {
                 if (picturesResource.exists()) {
                     // Пытаемся получить путь как файл (работает в IDE и при запуске из файловой системы)
@@ -285,7 +269,7 @@ public class DataInitializer implements CommandLineRunner {
             } catch (Exception e) {
                 // Если не удалось получить как файл (например, в JAR), пробуем альтернативные пути
             }
-            
+
             // Альтернативный путь для работы внутри Docker-контейнера:
             // в Dockerfile мы копируем исходные картинки в /opt/spring-digital-bookstore/pictures-source
             if (picturesPath == null || !Files.exists(picturesPath)) {
@@ -294,7 +278,7 @@ public class DataInitializer implements CommandLineRunner {
                     picturesPath = dockerPicturesPath;
                 }
             }
-            
+
             // Альтернативный способ получения пути для разработки (IDE / локальный запуск)
             if (picturesPath == null || !Files.exists(picturesPath)) {
                 picturesPath = Paths.get("src/main/resources/pictures");
@@ -303,187 +287,223 @@ public class DataInitializer implements CommandLineRunner {
                     return;
                 }
             }
-            
+
             // Создаем папку для хранения изображений если её нет
             Path storageDir = Paths.get(storagePath);
             if (!Files.exists(storageDir)) {
                 Files.createDirectories(storageDir);
                 System.out.println("Created storage directory: " + storagePath);
             }
-            
+
             // Получаем все книги из базы данных
             List<Book> allBooks = bookRepository.findAll();
-            
+
             AtomicInteger processedCount = new AtomicInteger(0);
             AtomicInteger matchedCount = new AtomicInteger(0);
-            
+
             // Проходим по всем файлам в папке pictures
             if (Files.exists(picturesPath) && Files.isDirectory(picturesPath)) {
                 try (java.util.stream.Stream<Path> files = Files.list(picturesPath)) {
                     files.filter(Files::isRegularFile)
-                        .forEach(imageFile -> {
-                        try {
-                            String imageFileName = imageFile.getFileName().toString();
-                            // Убираем расширение для сравнения
-                            String imageNameWithoutExt = imageFileName;
-                            int lastDotIndex = imageFileName.lastIndexOf('.');
-                            if (lastDotIndex > 0) {
-                                imageNameWithoutExt = imageFileName.substring(0, lastDotIndex);
-                            }
-                            
-                            // Нормализуем имя файла: заменяем _ на пробелы, приводим к нижнему регистру
-                            String normalizedImageName = imageNameWithoutExt
-                                .replaceAll("_", " ")
-                                .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
-                                .toLowerCase()
-                                .trim();
-                            
-                            // Ищем соответствующую книгу
-                            for (Book book : allBooks) {
-                                // Пропускаем книги, у которых уже есть изображение
-                                if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
-                                    continue;
-                                }
-                                
-                                // Нормализуем название книги: приводим к нижнему регистру, нормализуем пробелы
-                                String bookTitleNormalized = book.getTitle()
-                                    .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
-                                    .toLowerCase()
-                                    .trim();
-                                
-                                // Сравниваем нормализованные имена
-                                if (normalizedImageName.equals(bookTitleNormalized)) {
-                                    try {
-                                        // Получаем расширение файла
-                                        String extension = "";
-                                        if (lastDotIndex > 0) {
-                                            extension = imageFileName.substring(lastDotIndex);
-                                        }
-                                        
-                                        // Формируем имя файла для сохранения (на основе названия книги)
-                                        // Заменяем пробелы на _, но сохраняем все символы включая русские
-                                        String sanitizedTitle = book.getTitle()
-                                            .replaceAll("\\s+", "_")
-                                            .replaceAll("[<>:\"|?*]", ""); // Удаляем только недопустимые символы для Windows/Linux
-                                        String targetFileName = sanitizedTitle + extension;
-                                        
-                                        // Путь для сохранения
-                                        Path targetPath = storageDir.resolve(targetFileName);
-
-                                        // Если файл уже существует, не копируем заново и не меняем имя
-                                        if (Files.exists(targetPath)) {
-                                            System.out.println("Image file already exists, skipping copy: " + targetFileName);
-                                        } else {
-                                            // Копируем файл (создаем новый)
-                                            Files.copy(imageFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                                        }
-                                        
-                                        // Обновляем путь к изображению в базе данных
-                                        book.setImagePath(targetPath.toString());
-                                        bookRepository.save(book);
-                                        
-                                        System.out.println("Matched and copied image for book: " + book.getTitle() + " -> " + targetFileName);
-                                        matchedCount.incrementAndGet();
-                                        
-                                    } catch (IOException e) {
-                                        System.err.println("Failed to copy image for book " + book.getTitle() + ": " + e.getMessage());
+                            .forEach(imageFile -> {
+                                try {
+                                    String imageFileName = imageFile.getFileName().toString();
+                                    // Убираем расширение для сравнения
+                                    String imageNameWithoutExt = imageFileName;
+                                    int lastDotIndex = imageFileName.lastIndexOf('.');
+                                    if (lastDotIndex > 0) {
+                                        imageNameWithoutExt = imageFileName.substring(0, lastDotIndex);
                                     }
-                                    break; // Нашли соответствие, переходим к следующему файлу
+
+                                    // Нормализуем имя файла: заменяем _ на пробелы, приводим к нижнему регистру
+                                    String normalizedImageName = imageNameWithoutExt
+                                            .replaceAll("_", " ")
+                                            .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
+                                            .toLowerCase()
+                                            .trim();
+
+                                    // Ищем соответствующую книгу
+                                    for (Book book : allBooks) {
+                                        // Пропускаем книги, у которых уже есть изображение
+                                        if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+                                            continue;
+                                        }
+
+                                        // Нормализуем название книги: приводим к нижнему регистру, нормализуем пробелы
+                                        String bookTitleNormalized = book.getTitle()
+                                                .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
+                                                .toLowerCase()
+                                                .trim();
+
+                                        // Сравниваем нормализованные имена
+                                        if (normalizedImageName.equals(bookTitleNormalized)) {
+                                            try {
+                                                // Получаем расширение файла
+                                                String extension = "";
+                                                if (lastDotIndex > 0) {
+                                                    extension = imageFileName.substring(lastDotIndex);
+                                                }
+
+                                                // Формируем имя файла для сохранения (на основе названия книги)
+                                                // Заменяем пробелы на _, но сохраняем все символы включая русские
+                                                String sanitizedTitle = book.getTitle()
+                                                        .replaceAll("\\s+", "_")
+                                                        .replaceAll("[<>:\"|?*]", ""); // Удаляем только недопустимые символы для Windows/Linux
+                                                String targetFileName = sanitizedTitle + extension;
+
+                                                // Путь для сохранения
+                                                Path targetPath = storageDir.resolve(targetFileName);
+
+                                                // Если файл уже существует, не копируем заново и не меняем имя
+                                                if (Files.exists(targetPath)) {
+                                                    System.out.println("Image file already exists, skipping copy: " + targetFileName);
+                                                } else {
+                                                    // Копируем файл (создаем новый)
+                                                    Files.copy(imageFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                                                }
+
+                                                // Обновляем путь к изображению в базе данных
+                                                book.setImagePath(targetPath.toString());
+                                                bookRepository.save(book);
+
+                                                System.out.println("Matched and copied image for book: " + book.getTitle() + " -> " + targetFileName);
+                                                matchedCount.incrementAndGet();
+                                            } catch (IOException e) {
+                                                System.err.println("Failed to copy image for book " + book.getTitle() + ": " + e.getMessage());
+                                            }
+                                            break; // Нашли соответствие, переходим к следующему файлу
+                                        }
+                                    }
+                                    processedCount.incrementAndGet();
+                                } catch (Exception e) {
+                                    System.err.println("Error processing image file " + imageFile.getFileName() + ": " + e.getMessage());
                                 }
-                            }
-                            processedCount.incrementAndGet();
-                        } catch (Exception e) {
-                            System.err.println("Error processing image file " + imageFile.getFileName() + ": " + e.getMessage());
-                        }
-                    });
+                            });
                 } catch (IOException e) {
                     System.err.println("Error listing files in pictures directory: " + e.getMessage());
                 }
             }
-            
+
             System.out.println("Image processing completed: " + processedCount.get() + " files processed, " + matchedCount.get() + " images matched and copied.");
-            
         } catch (Exception e) {
             System.err.println("Error during image processing: " + e.getMessage());
             e.printStackTrace();
         }
     }
-    
-    private List<Book> savedBooks;
-    
+
     private void addFunnyReviews() {
         // Получаем или создаем тестовых пользователей для отзывов
         User reviewer1 = getOrCreateUser("funny_reviewer_1", "funny1@example.com");
         User reviewer2 = getOrCreateUser("funny_reviewer_2", "funny2@example.com");
         User reviewer3 = getOrCreateUser("funny_reviewer_3", "funny3@example.com");
-        
+
         List<User> reviewers = List.of(reviewer1, reviewer2, reviewer3);
-        
+
         // Список смешных отзывов
         String[] funnyReviews = {
-            "Прочитал за один присест! Правда, пришлось три раза перезагружать компьютер, но оно того стоило!",
-            "Купил книгу случайно, думал это про кулинарию. Теперь я Senior Developer! 10/10, рекомендую!",
-            "Автор явно не тестировал код перед публикацией. У меня ничего не работает, но читать было весело!",
-            "Книга отличная, но почему-то после прочтения мой код стал еще хуже. Возможно, я что-то не так понял?",
-            "Прочитал на работе вместо выполнения задач. Босс недоволен, но я теперь знаю про dependency injection!",
-            "Купил для подарка другу-программисту. Он плакал от смеха, а потом от отчаяния. Отличная книга!",
-            "Книга помогла мне понять, что я вообще ничего не понимаю в программировании. Спасибо за просветление!",
-            "Прочитал за выходные. Теперь у меня нет выходных, но зато есть понимание Spring Boot!",
-            "Книга настолько хорошая, что я забыл поесть. И поспать. И выйти из дома. Помогите!",
-            "Автор обещал, что после прочтения я стану гуру. Я стал гуру в чтении книг о программировании!",
-            "Купил книгу, прочитал, ничего не понял, перечитал, снова ничего не понял. Купил еще одну книгу!",
-            "Книга изменила мою жизнь! Теперь я не сплю по ночам, но не потому что читаю, а потому что дебажу код!",
-            "Прочитал книгу и понял, что все эти годы я программировал неправильно. Теперь я программирую еще неправильнее!",
-            "Книга отличная, но почему-то мой кот начал писать на Java после того, как я ее прочитал. Это нормально?",
-            "Купил книгу для повышения квалификации. Теперь я квалифицированно не сплю по ночам!",
-            "Прочитал книгу и решил переписать весь проект. Теперь у меня нет проекта, но есть опыт!",
-            "Книга помогла мне понять, что я не один такой. Есть еще люди, которые не понимают, что они делают!",
-            "Купил книгу случайно, открыл случайно, прочитал случайно. Теперь я случайный Senior Developer!",
-            "Книга настолько информативная, что после прочтения мой мозг перезагрузился. Пришлось перечитать!",
-            "Прочитал книгу и понял, что все мои проблемы были из-за того, что я не читал эту книгу раньше!",
-            "Купил книгу по совету коллеги. Теперь я понимаю, почему он уволился!",
-            "Прочитал книгу и начал видеть код во сне. Просыпаюсь и пишу на Java. Помогите!",
-            "Книга отличная, но почему-то после прочтения мой компьютер начал сам себя обновлять. Это нормально?",
-            "Купил книгу для изучения. Теперь я знаю, что не знаю ничего. Спасибо за честность!",
-            "Прочитал книгу за один день. На следующий день забыл все. Перечитал. Забыл снова. Цикл бесконечен!",
-            "Книга помогла мне понять, что мой код - это не баги, это фичи! Спасибо за вдохновение!",
-            "Купил книгу случайно, прочитал случайно, понял случайно. Теперь я случайный архитектор!",
-            "Прочитал книгу и решил стать программистом. Теперь я программист, который не умеет программировать!",
-            "Книга настолько хорошая, что я купил еще 5 экземпляров. На всякий случай. И для друзей. И для кота.",
-            "Прочитал книгу и понял, что все эти годы я использовал неправильный фреймворк. Теперь использую еще неправильнее!",
-            "Купил книгу для повышения зарплаты. Зарплата не повысилась, но я теперь знаю про паттерны проектирования!",
-            "Прочитал книгу и начал рефакторить весь код. Теперь у меня нет рабочего кода, но есть понимание!",
-            "Книга отличная, но почему-то после прочтения мой IDE начал предлагать мне уволиться. Это нормально?",
-            "Купил книгу по акции. Теперь понимаю, почему она была по акции!",
-            "Прочитал книгу и понял, что мой код - это произведение искусства. Плохого искусства, но искусства!",
-            "Книга помогла мне понять, что я не тупой, просто книга слишком умная для меня!",
-            "Прочитал книгу и начал писать комментарии на русском. Теперь весь код на русском. Помогите!",
-            "Купил книгу для изучения. Теперь я эксперт в чтении книг о программировании. Код все еще не работает!"
+                "Прочитал за один присест! Правда, пришлось три раза перезагружать компьютер, но оно того стоило!",
+                "Купил книгу случайно, думал это про кулинарию. Теперь я Senior Developer! 10/10, рекомендую!",
+                "Автор явно не тестировал код перед публикацией. У меня ничего не работает, но читать было весело!",
+                "Книга отличная, но почему-то после прочтения мой код стал еще хуже. Возможно, я что-то не так понял?",
+                "Прочитал на работе вместо выполнения задач. Босс недоволен, но я теперь знаю про dependency injection!",
+                "Купил для подарка другу-программисту. Он плакал от смеха, а потом от отчаяния. Отличная книга!",
+                "Книга помогла мне понять, что я вообще ничего не понимаю в программировании. Спасибо за просветление!",
+                "Прочитал за выходные. Теперь у меня нет выходных, но зато есть понимание Spring Boot!",
+                "Книга настолько хорошая, что я забыл поесть. И поспать. И выйти из дома. Помогите!",
+                "Автор обещал, что после прочтения я стану гуру. Я стал гуру в чтении книг о программировании!",
+                "Купил книгу, прочитал, ничего не понял, перечитал, снова ничего не понял. Купил еще одну книгу!",
+                "Книга изменила мою жизнь! Теперь я не сплю по ночам, но не потому что читаю, а потому что дебажу код!",
+                "Прочитал книгу и понял, что все эти годы я программировал неправильно. Теперь я программирую еще неправильнее!",
+                "Книга отличная, но почему-то мой кот начал писать на Java после того, как я ее прочитал. Это нормально?",
+                "Купил книгу для повышения квалификации. Теперь я квалифицированно не сплю по ночам!",
+                "Прочитал книгу и решил переписать весь проект. Теперь у меня нет проекта, но есть опыт!",
+                "Книга помогла мне понять, что я не один такой. Есть еще люди, которые не понимают, что они делают!",
+                "Купил книгу случайно, открыл случайно, прочитал случайно. Теперь я случайный Senior Developer!",
+                "Книга настолько информативная, что после прочтения мой мозг перезагрузился. Пришлось перечитать!",
+                "Прочитал книгу и понял, что все мои проблемы были из-за того, что я не читал эту книгу раньше!",
+                "Купил книгу по совету коллеги. Теперь я понимаю, почему он уволился!",
+                "Прочитал книгу и начал видеть код во сне. Просыпаюсь и пишу на Java. Помогите!",
+                "Книга отличная, но почему-то после прочтения мой компьютер начал сам себя обновлять. Это нормально?",
+                "Купил книгу для изучения. Теперь я знаю, что не знаю ничего. Спасибо за честность!",
+                "Прочитал книгу за один день. На следующий день забыл все. Перечитал. Забыл снова. Цикл бесконечен!",
+                "Книга помогла мне понять, что мой код - это не баги, это фичи! Спасибо за вдохновение!",
+                "Купил книгу случайно, прочитал случайно, понял случайно. Теперь я случайный архитектор!",
+                "Прочитал книгу и решил стать программистом. Теперь я программист, который не умеет программировать!",
+                "Книга настолько хорошая, что я купил еще 5 экземпляров. На всякий случай. И для друзей. И для кота.",
+                "Прочитал книгу и понял, что все эти годы я использовал неправильный фреймворк. Теперь использую еще неправильнее!",
+                "Купил книгу для повышения зарплаты. Зарплата не повысилась, но я теперь знаю про паттерны проектирования!",
+                "Прочитал книгу и начал рефакторить весь код. Теперь у меня нет рабочего кода, но есть понимание!",
+                "Книга отличная, но почему-то после прочтения мой IDE начал предлагать мне уволиться. Это нормально?",
+                "Купил книгу по акции. Теперь понимаю, почему она была по акции!",
+                "Прочитал книгу и понял, что мой код - это произведение искусства. Плохого искусства, но искусства!",
+                "Книга помогла мне понять, что я не тупой, просто книга слишком умная для меня!",
+                "Прочитал книгу и начал писать комментарии на русском. Теперь весь код на русском. Помогите!",
+                "Купил книгу для изучения. Теперь я эксперт в чтении книг о программировании. Код все еще не работает!",
+                "Прочитал книгу до конца и понял, что мне срочно нужен отпуск. Или новый мозг.",
+                "Книга хорошая, но почему-то после неё все мои баги стали осознанными.",
+                "Читал с блокнотом. Записал туда свои слёзы и stack trace.",
+                "Книга настолько глубокая, что я утонул где-то на третьей главе.",
+                "После прочтения начал уважать чужой код. Свой — по-прежнему ненавижу.",
+                "Прочитал и решил: пора учиться дальше. Закрыл книгу. Открыл YouTube.",
+                "Книга научила меня главному — всегда делай бэкап перед чтением.",
+                "После этой книги мой код стал чище. Правда, проект больше не собирается.",
+                "Автор обещал простые примеры. Они простые… если ты автор.",
+                "Книга читается легко, а вот жизнь после неё — нет.",
+                "Прочитал половину, понял всё. Прочитал вторую половину — понял, что ничего не понял.",
+                "Книга помогла осознать, что кофе — это dependency, а сон — optional.",
+                "После прочтения захотелось переписать код. И резюме. И жизнь.",
+                "Книга хорошая, но я всё равно загуглил каждый пример.",
+                "Прочитал книгу и начал разговаривать с компьютером. Он не отвечает, но слушает.",
+                "Теперь я знаю, как надо писать код. Осталось понять, как так писать.",
+                "Книга вдохновляет! Особенно вдохновляет закрыть IDE и пойти гулять.",
+                "Прочитал книгу и понял, почему у нас в проекте всё так, как есть.",
+                "Книга настолько честная, что мне стало немного больно.",
+                "После прочтения начал писать тесты. Потом вспомнил, что дедлайн вчера.",
+                "Автор явно страдал, пока писал эту книгу. Я страдал, пока читал. Мы квиты.",
+                "Книга отличная, но мой мозг запросил перезагрузку.",
+                "Прочитал книгу и стал умнее. Ненадолго, но приятно.",
+                "После этой книги понял, что legacy — это состояние души.",
+                "Книга читается быстро, если пропускать места, где ничего не понимаешь.",
+                "Прочитал книгу и понял, что код — это временно, баги — навсегда.",
+                "Книга помогла принять мой код таким, какой он есть. Ужасным, но родным.",
+                "После прочтения захотелось удалить весь проект. Начал с README.",
+                "Книга настолько мотивирует, что я открыл IDE. И тут же закрыл.",
+                "Прочитал книгу и начал видеть архитектуру там, где её нет.",
+                "Книга хорошая, но почему-то у меня повысилось количество TODO.",
+                "Прочитал книгу и понял, что senior — это состояние усталости.",
+                "Книга помогла мне осознать, что проблема не в коде. Проблема во мне.",
+                "После прочтения начал писать код медленнее, но с чувством.",
+                "Книга отличная, если вы любите боль, рефакторинг и самоанализ.",
+                "Прочитал книгу и стал говорить фразу: «Это ожидаемое поведение».",
+                "Книга вдохновила меня начать новый проект. Старый я так и не закончил.",
+                "После книги понял, что главное — не сломать то, что и так не работает.",
+                "Книга хорошая, но я всё равно делаю по-своему.",
+                "Прочитал книгу. Теперь знаю, как не надо делать. Это уже прогресс!"
         };
-        
+
         int reviewIndex = 0;
         int reviewsAdded = 0;
-        
+
         // Добавляем отзывы к каждой второй книге (начиная с индекса 1: 1, 3, 5, 7...)
         for (int i = 1; i < savedBooks.size(); i += 2) {
             Book book = savedBooks.get(i);
-            
+
             // Определяем количество отзывов (1 или 2)
             int numberOfReviews = random.nextInt(2) + 1; // 1 или 2
-            
+
             for (int j = 0; j < numberOfReviews; j++) {
                 // Выбираем случайного ревьюера
                 User reviewer = reviewers.get(random.nextInt(reviewers.size()));
-                
+
                 // Проверяем, нет ли уже отзыва от этого пользователя
                 if (reviewRepository.existsByBookIdAndUserId(book.getId(), reviewer.getId())) {
                     continue;
                 }
-                
+
                 // Выбираем случайный отзыв
                 String reviewText = funnyReviews[reviewIndex % funnyReviews.length];
                 reviewIndex++;
-                
+
                 // Создаем отзыв
                 Review review = Review.builder()
                         .book(book)
@@ -491,10 +511,10 @@ public class DataInitializer implements CommandLineRunner {
                         .text(reviewText)
                         .build();
                 reviewRepository.save(review);
-                
-                // Создаем оценку (от 3 до 5, чтобы было смешно)
-                short ratingValue = (short) (random.nextInt(3) + 3); // 3, 4 или 5
-                
+
+                // Создаем оценку (от 3 до 10, чтобы было смешно)
+                short ratingValue = (short) (random.nextInt(3) + 8);
+
                 // Проверяем, нет ли уже оценки от этого пользователя
                 if (!ratingRepository.existsByBookIdAndUserId(book.getId(), reviewer.getId())) {
                     Rating rating = Rating.builder()
@@ -504,14 +524,14 @@ public class DataInitializer implements CommandLineRunner {
                             .build();
                     ratingRepository.save(rating);
                 }
-                
+
                 reviewsAdded++;
             }
         }
-        
+
         System.out.println("Funny reviews initialization completed: " + reviewsAdded + " reviews added.");
     }
-    
+
     private User getOrCreateUser(String nickname, String email) {
         return userRepository.findByEmail(email)
                 .orElseGet(() -> {
