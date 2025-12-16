@@ -45,7 +45,7 @@ public class AuthController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных",
+                    description = "Неверный формат данных (ключ errors содержит только те поля, которые не прошли валидацию, и может включать одно или несколько полей)",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ValidationErrorResponse.class),
