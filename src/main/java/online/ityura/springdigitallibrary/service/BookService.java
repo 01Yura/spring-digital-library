@@ -12,7 +12,9 @@ import online.ityura.springdigitallibrary.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +38,7 @@ public class BookService {
     
     public BookResponse getBookById(Long bookId) {
         Book book = bookRepository.findByIdWithAuthor(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found with id: " + bookId));
         
         // Загружаем отзывы для детальной информации о книге (с JOIN FETCH для избежания N+1 проблем)
         List<Review> reviews = reviewRepository.findByBookIdWithUserOrderByCreatedAtDesc(bookId);
