@@ -10,6 +10,7 @@ import online.ityura.springdigitallibrary.service.BookImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -56,12 +57,20 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "403",
                     description = "Недостаточно прав (требуется роль ADMIN)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Книга с таким названием и автором уже существует",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                    )
             )
     })
     @PostMapping
@@ -92,12 +101,20 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "403",
                     description = "Недостаточно прав (требуется роль ADMIN)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Одна из книг с таким названием и автором уже существует",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                    )
             )
     })
     @PostMapping("/batch")
@@ -125,17 +142,29 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Недостаточно прав",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Конфликт уникальности",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                    )
             )
     })
     @PutMapping("/{bookId}")
@@ -168,17 +197,29 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Недостаточно прав",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Конфликт уникальности",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                    )
             )
     })
     @PatchMapping(value = "/{bookId}", consumes = "application/json")
@@ -212,17 +253,29 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Недостаточно прав",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Конфликт уникальности",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                    )
             )
     })
     @PatchMapping(value = "/{bookId}", consumes = "multipart/form-data")
@@ -272,12 +325,20 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "403",
                     description = "Удаление запрещено (deletion_locked или есть отзывы)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             )
     })
     @DeleteMapping("/{bookId}")
@@ -301,17 +362,29 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Автор не найден",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Author not found with id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Удаление запрещено (deletion_locked или есть отзывы)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Конфликт (книга имеет отзывы)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book has reviews\"}")
+                    )
             )
     })
     @DeleteMapping("/authors/{authorId}")
@@ -333,22 +406,38 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Изображение успешно загружено",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Image uploaded successfully\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных или файл слишком большой",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Invalid file format or file too large\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Недостаточно прав (требуется роль ADMIN)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                    )
             )
     })
     @PostMapping(value = "/{bookId}/image", consumes = "multipart/form-data")

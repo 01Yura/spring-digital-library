@@ -5,6 +5,7 @@ import online.ityura.springdigitallibrary.service.BookFileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -42,12 +43,20 @@ public class BookFileController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга или файл не найдены",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"File not found for book id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Не авторизован",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Unauthorized\"}")
+                    )
             )
     })
     @GetMapping("/download")

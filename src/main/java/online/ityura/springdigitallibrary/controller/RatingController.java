@@ -9,6 +9,7 @@ import online.ityura.springdigitallibrary.service.RatingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -54,12 +55,20 @@ public class RatingController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Рейтинг уже существует для этой книги",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Rating already exists for this book\"}")
+                    )
             )
     })
     @PostMapping
@@ -92,7 +101,11 @@ public class RatingController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Рейтинг не найден",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Rating not found\"}")
+                    )
             )
     })
     @PutMapping("/my")

@@ -11,7 +11,7 @@ import lombok.Data;
 @Schema(description = "Запрос на регистрацию нового пользователя")
 public class RegisterRequest {
     
-    @Schema(description = "Никнейм пользователя", example = "John Doe", requiredMode = Schema.RequiredMode.REQUIRED, minLength = 3, maxLength = 50)
+    @Schema(description = "Никнейм пользователя", example = "john_doe", requiredMode = Schema.RequiredMode.REQUIRED, minLength = 3, maxLength = 50)
     @NotBlank(message = "Nickname is required")
     @Size(min = 3, max = 50, message = "Nickname must be between 3 and 50 characters")
     @Pattern(regexp = "^[\\w\\.\\-]+$", message = "Nickname must contain only letters, digits, dashes, underscores, and dots. Spaces and other special characters are not allowed")

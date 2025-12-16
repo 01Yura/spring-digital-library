@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Ответ с сообщением")
 public class MessageResponse {
     
-    @Schema(description = "Сообщение", example = "Operation completed successfully")
+    @Schema(description = "Сообщение")
     private String message;
 }

@@ -7,6 +7,7 @@ import online.ityura.springdigitallibrary.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -74,7 +75,11 @@ public class BookController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга не найдена",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                    )
             )
     })
     @SecurityRequirements
@@ -99,7 +104,11 @@ public class BookController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Книга или изображение не найдены",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Image not found for book id: 1\"}")
+                    )
             )
     })
     @SecurityRequirements

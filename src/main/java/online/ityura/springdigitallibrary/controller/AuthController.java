@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Аутентификация", description = "API для регистрации и входа в систему")
+@Tag(name = "Аутентификация", description = "API для регистрации и входа в систему (JWT access token и refresh токены)")
 public class AuthController {
     
     @Autowired
@@ -40,18 +40,26 @@ public class AuthController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = RegisterResponse.class),
-                            examples = @ExampleObject(value = "{\"userId\":1,\"email\":\"user@example.com\",\"role\":\"USER\"}")
+                            examples = @ExampleObject(value = "{\"userId\":1,\"email\":\"john@example.com\",\"role\":\"USER\"}")
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"nickname\":\"Nickname must contain only letters, digits, dashes, underscores, and dots. Spaces and other special characters are not allowed\",\"password\":\"Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
                     description = "Email уже существует",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Email already exists\"}")
+                    )
             )
     })
     @PostMapping("/register")
@@ -77,12 +85,20 @@ public class AuthController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Неверные учетные данные",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Bad credentials\"}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"email\":\"Email should be valid\",\"password\":\"Password is required\"}}")
+                    )
             )
     })
     @PostMapping("/login")
@@ -114,7 +130,11 @@ public class AuthController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Refresh токен недействителен или истек",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\":\"Refresh token is expired or invalid\"}")
+                    )
             )
     })
     @PostMapping("/refresh")
