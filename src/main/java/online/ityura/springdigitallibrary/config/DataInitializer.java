@@ -128,7 +128,95 @@ public class DataInitializer implements CommandLineRunner {
                 new BookData("Hardcoded Desires", "Johnny Runtime", "Passion, constants, and values that should never be in plain text", 2017, Genre.PORNO),
                 new BookData("Backend After Midnight", "Lola Stacktrace", "Things get hot when the frontend finally stops calling", 2019, Genre.PORNO),
                 new BookData("Deploy Me Gently", "Johnny Runtime", "A slow and careful release with unexpected rollbacks", 2021, Genre.PORNO),
-                new BookData("Touch My Endpoint", "Lola Stacktrace", "A very insecure API exposed to the whole internet", 2023, Genre.PORNO)
+                new BookData("Touch My Endpoint", "Lola Stacktrace", "A very insecure API exposed to the whole internet", 2023, Genre.PORNO),
+                new BookData("Stack Overflow Is My Therapist", "Ivan Debugov",
+        "How copy-paste, downvotes, and comments keep developers sane", 2021, Genre.FOR_NERDS),
+
+new BookData("Segmentation Faults and Broken Hearts", "Anna CoreDump",
+        "When memory leaks hurt more than breakups", 2020, Genre.FOR_NERDS),
+
+new BookData("Big-O and Chill", "Eugene Knuth",
+        "Romantic evenings spent optimizing algorithms", 2019, Genre.FOR_NERDS),
+
+new BookData("Regex Made Me Cry", "Victor Pattern",
+        "True stories of developers vs regular expressions", 2018, Genre.FOR_NERDS),
+
+new BookData("The Zen of NullPointerException", "Sam Exception",
+        "Finding inner peace while debugging production crashes", 2022, Genre.FOR_NERDS),
+
+new BookData("Works on My Machine", "Localhost Hero",
+        "A philosophical study of environment-specific bugs", 2017, Genre.FOR_NERDS),
+
+new BookData("Concurrency for Masochists", "Thread Master",
+        "Why synchronized blocks destroy your soul", 2020, Genre.FOR_NERDS),
+
+new BookData("Docker Containers and Existential Questions", "Lina DevOps",
+        "Why everything works only after rebuilding the image", 2023, Genre.FOR_NERDS),
+
+new BookData("The Sacred Art of Console Logging", "Println Monk",
+        "Advanced debugging techniques using System.out", 2016, Genre.FOR_NERDS),
+
+new BookData("Git Rebase: Choose Your Own Adventure", "Branch Rider",
+        "Every wrong move leads to force-push", 2022, Genre.FOR_NERDS),
+        new BookData("Friday Night With Jenkins", "CI Lover",
+        "How pipelines replaced friends and hobbies", 2019, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("My Only Dates Are Deadlines", "Alex Turner",
+        "A developer's guide to emotional availability via Jira", 2021, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("Living Alone With Legacy Code", "Refactor Ghost",
+        "Why nobody touches it and everyone is afraid", 2018, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("Weekend Plans: Fix Production", "OnCall Engineer",
+        "Stories of canceled vacations and midnight alerts", 2020, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("Headphones On, World Off", "Silent Dev",
+        "Escaping human interaction using noise cancellation", 2017, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("Burnout as a Feature", "Agile Survivor",
+        "Why sprints never end and weekends don't exist", 2022, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("Alone in the Open Space", "Desk Nomad",
+        "Surrounded by people, talking only to Slack", 2019, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("No Meetings, No Feelings", "Calendar Hater",
+        "Emotional minimalism for remote developers", 2023, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("Side Projects and Silent Evenings", "Pet Projector",
+        "Replacing social life with unfinished repositories", 2020, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+
+new BookData("404 Friends Not Found", "Alex Turner",
+        "Advanced isolation techniques using code and excuses", 2018, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+        new BookData("The Commit That Should Not Exist", "Stephen Black",
+        "A horror story about a mysterious commit in main branch", 2017, Genre.HORROR),
+
+new BookData("Production at 3 AM", "Night Pager",
+        "Every alert hides something unspeakable", 2021, Genre.HORROR),
+
+new BookData("The Server Room Whispered Back", "Daemon Root",
+        "Strange things happen when logs start writing themselves", 2019, Genre.HORROR),
+
+new BookData("They Deployed on Friday", "Release Manager",
+        "A cautionary tale of broken rules and haunted weekends", 2018, Genre.HORROR),
+
+new BookData("The Log File Never Ends", "Infinite Stream",
+        "Scrolling logs until something scrolls back", 2020, Genre.HORROR),
+
+new BookData("Unknown Error", "Stack Trace",
+        "No message, no code, only fear", 2016, Genre.HORROR),
+
+new BookData("The Test That Sometimes Passes", "Flaky Master",
+        "Unreproducible failures and creeping madness", 2022, Genre.HORROR),
+
+new BookData("Haunted Microservice", "Service Mesh",
+        "One service fails and nobody knows why", 2023, Genre.HORROR),
+
+new BookData("The Password Was Correct Yesterday", "Auth Keeper",
+        "Authentication horror beyond human understanding", 2019, Genre.HORROR),
+
+new BookData("Legacy System: Do Not Touch", "Stephen Black",
+        "Every change makes it worse", 2015, Genre.HORROR),
+
         };
 
 
