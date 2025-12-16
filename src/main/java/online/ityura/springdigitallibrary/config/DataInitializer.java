@@ -120,7 +120,8 @@ public class DataInitializer implements CommandLineRunner {
                 new BookData("API Testing Playbook", "Nina Carter", "Practical guide to REST API testing: cases, checks, and common pitfalls", 2023, Genre.EDUCATION),
                 new BookData("Big-O Until Morning", "Eugene Knuth", "A true story about optimizing algorithms instead of sleeping", 2021, Genre.FOR_NERDS),
                 new BookData("Hello World, My Old Friend", "Max Compiler", "Existential thoughts of a developer who prints logs for a living", 2019, Genre.FOR_NERDS),
-                new BookData("404: Social Life Not Found", "Alex Turner", "Advanced guide to avoiding people using code, headphones, and deadlines", 2020, Genre.FOR_NERDS),
+                new BookData("404. Social Life Not Found", "Alex Turner", "Advanced guide to avoiding people using " +
+                        "code, headphones, and deadlines", 2020, Genre.FOR_NERDS),
                 new BookData("Refactor First, Ask Questions Later", "Robert Martin", "Why touching legacy code is scary but still unavoidable", 2018, Genre.FOR_NERDS),
                 new BookData("Git Push and Pray", "Nina Carter", "A spiritual journey through force-pushes and broken pipelines", 2022, Genre.FOR_NERDS),
                 new BookData("Fifty Shades of Pull Requests", "Anonymous Author", "A forbidden romance between a junior developer and production branch", 2016, Genre.PORNO),
