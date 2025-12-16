@@ -9,11 +9,13 @@ import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
@@ -61,7 +63,7 @@ public class AuthService {
         );
         
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
         String accessToken = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole().name());
@@ -86,7 +88,7 @@ public class AuthService {
         
         // Проверяем, что пользователь существует
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
         // Валидируем токен
         org.springframework.security.core.userdetails.UserDetails userDetails = 

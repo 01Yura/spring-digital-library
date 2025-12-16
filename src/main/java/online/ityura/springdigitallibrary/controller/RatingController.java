@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/v1/books/{bookId}/ratings")
@@ -121,7 +122,7 @@ public class RatingController {
     private Long getCurrentUserId(Authentication authentication) {
         String email = ((UserDetails) authentication.getPrincipal()).getUsername();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"))
                 .getId();
     }
 }
