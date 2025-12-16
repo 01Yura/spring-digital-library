@@ -43,6 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         
+        // Пропускаем публичные эндпоинты книг без проверки JWT
+        if (requestPath.startsWith("/api/v1/books") && 
+            (requestPath.equals("/api/v1/books") || 
+             requestPath.matches("/api/v1/books/\\d+/image") ||
+             requestPath.equals("/api/v1/books/images/all"))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;

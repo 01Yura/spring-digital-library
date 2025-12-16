@@ -53,11 +53,16 @@ public class SecurityConfig {
                 // TODO: ВРЕМЕННО ОТКРЫТО БЕЗ АВТОРИЗАЦИИ - убрать эту строку для возврата требования авторизации
                 .requestMatchers("/api/v1/admin/books/*/image").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                // Публичные эндпоинты для книг (более специфичные правила идут первыми)
                 .requestMatchers("/api/v1/books").permitAll()
-                .requestMatchers("/api/v1/books/*").permitAll()
-                .requestMatchers("/api/v1/books/*/image").permitAll()
                 .requestMatchers("/api/v1/books/images/all").permitAll()
-                .requestMatchers("/api/v1/books/**").hasAnyRole("USER", "ADMIN")
+                // Эндпоинты изображений - публичные (паттерн для /api/v1/books/{id}/image)
+                .requestMatchers("/api/v1/books/*/image").permitAll()
+                // Эндпоинты, требующие авторизацию (используем * вместо ** в середине)
+                .requestMatchers("/api/v1/books/*/ratings/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/v1/books/*/reviews/**").hasAnyRole("USER", "ADMIN")
+                // Остальные эндпоинты книг (например, /api/v1/books/{id}) - публичные
+                .requestMatchers("/api/v1/books/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

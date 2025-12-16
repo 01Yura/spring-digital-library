@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,7 +24,9 @@ public class GlobalExceptionHandler {
         MessageResponse response = MessageResponse.builder()
                 .message(ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString())
                 .build();
-        return ResponseEntity.status(ex.getStatusCode()).body(response);
+        return ResponseEntity.status(ex.getStatusCode())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
     
     @ExceptionHandler(RuntimeException.class)
@@ -31,7 +34,9 @@ public class GlobalExceptionHandler {
         MessageResponse response = MessageResponse.builder()
                 .message(ex.getMessage() != null ? ex.getMessage() : "Internal server error")
                 .build();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -47,7 +52,9 @@ public class GlobalExceptionHandler {
                 .errors(errors)
                 .build();
         
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 }
 
