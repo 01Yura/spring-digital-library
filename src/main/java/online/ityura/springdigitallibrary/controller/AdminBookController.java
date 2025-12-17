@@ -338,17 +338,27 @@ public class AdminBookController {
     @Operation(
             summary = "Удалить книгу",
             description = "Удаляет книгу из каталога. Удаление запрещено, если: " +
-                    "1) deletion_locked = true (на уровне БД), 2) есть связанные отзывы. Требуется роль ADMIN."
+                    "1) deletion_locked = true (административная блокировка, установленная в БД) - возвращает 403, " +
+                    "2) есть связанные отзывы - возвращает 409. Требуется роль ADMIN."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Книга успешно удалена"),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Удаление запрещено (deletion_locked или есть отзывы)",
+                    description = "Удаление запрещено администратором (deletion_locked = true в БД)",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Deletion is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Cannot delete book: deletion is locked\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Удаление запрещено (есть связанные отзывы)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_HAS_REVIEWS\",\"message\":\"Cannot delete book: it has reviews\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -374,7 +384,8 @@ public class AdminBookController {
             description = "Удаляет автора и все его книги из каталога. " +
                     "При удалении также удаляются все связанные данные: файлы книг, отзывы и рейтинги. " +
                     "Удаление запрещено, если у какой-либо книги: " +
-                    "1) deletion_locked = true (на уровне БД), 2) есть связанные отзывы. " +
+                    "1) deletion_locked = true (административная блокировка, установленная в БД) - возвращает 403, " +
+                    "2) есть связанные отзывы - возвращает 409. " +
                     "Требуется роль ADMIN."
     )
     @ApiResponses(value = {
@@ -390,20 +401,20 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Удаление запрещено (deletion_locked или есть отзывы)",
+                    description = "Удаление запрещено администратором (deletion_locked = true в БД)",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Deletion is not allowed by admin\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Cannot delete book with id 1: deletion is locked\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
                     )
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Конфликт (книга имеет отзывы)",
+                    description = "Удаление запрещено (книга имеет отзывы)",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Deletion is not allowed, because the book has reviews\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_HAS_REVIEWS\",\"message\":\"Cannot delete book with id 1: it has reviews\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
                     )
             )
     })
