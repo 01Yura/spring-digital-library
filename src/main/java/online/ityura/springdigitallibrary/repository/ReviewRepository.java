@@ -3,6 +3,7 @@ package online.ityura.springdigitallibrary.repository;
 import online.ityura.springdigitallibrary.model.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +24,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     
     @Query("SELECT r FROM Review r JOIN FETCH r.user JOIN FETCH r.book WHERE r.book.id = :bookId ORDER BY r.createdAt DESC")
     List<Review> findByBookIdWithUserOrderByCreatedAtDesc(@Param("bookId") Long bookId);
+    
+    @EntityGraph(attributePaths = {"user", "book"})
+    Page<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }
 

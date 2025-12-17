@@ -167,6 +167,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByBookId(bookId, pageable));
     }
     
+    
     private Long getCurrentUserId(Authentication authentication) {
         String email = ((UserDetails) authentication.getPrincipal()).getUsername();
         return userRepository.findByEmail(email)

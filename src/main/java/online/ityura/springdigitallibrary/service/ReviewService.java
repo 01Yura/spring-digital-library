@@ -79,6 +79,11 @@ public class ReviewService {
         return mapToReviewResponse(review);
     }
     
+    public Page<ReviewResponse> getMyReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(this::mapToReviewResponse);
+    }
+    
     private ReviewResponse mapToReviewResponse(Review review) {
         return ReviewResponse.builder()
                 .id(review.getId())
