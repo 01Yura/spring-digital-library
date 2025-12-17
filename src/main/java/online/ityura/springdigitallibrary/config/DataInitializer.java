@@ -40,6 +40,8 @@ public class DataInitializer implements CommandLineRunner {
     private ResourceLoader resourceLoader;
     @Value("${app.images.storage-path}")
     private String storagePath;
+    @Value("${app.pdf.storage-path}")
+    private String pdfStoragePath;
     private List<Book> savedBooks;
 
     @Override
@@ -64,6 +66,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // Обработка картинок из папки pictures
         processBookImages();
+
+        // Обработка PDF файлов из папки pdf
+        processBookPdfs();
 
         // Добавление смешных отзывов к каждой второй книге
         addFunnyReviews();
@@ -387,6 +392,149 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Image processing completed: " + processedCount.get() + " files processed, " + matchedCount.get() + " images matched and copied.");
         } catch (Exception e) {
             System.err.println("Error during image processing: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void processBookPdfs() {
+        try {
+            // Получаем путь к папке pdf в resources
+            Resource pdfResource = resourceLoader.getResource("classpath:pdf");
+            Path pdfPath = null;
+
+            try {
+                if (pdfResource.exists()) {
+                    // Пытаемся получить путь как файл (работает в IDE и при запуске из файловой системы)
+                    java.io.File file = pdfResource.getFile();
+                    if (file.exists() && file.isDirectory()) {
+                        pdfPath = file.toPath();
+                    }
+                }
+            } catch (Exception e) {
+                // Если не удалось получить как файл (например, в JAR), пробуем альтернативные пути
+            }
+
+            // Альтернативный путь для работы внутри Docker-контейнера:
+            // в Dockerfile мы копируем исходные PDF файлы в /opt/spring-digital-bookstore/pdf-source
+            if (pdfPath == null || !Files.exists(pdfPath)) {
+                Path dockerPdfPath = Paths.get("/opt/spring-digital-bookstore/pdf-source");
+                if (Files.exists(dockerPdfPath) && Files.isDirectory(dockerPdfPath)) {
+                    pdfPath = dockerPdfPath;
+                }
+            }
+
+            // Альтернативный способ получения пути для разработки (IDE / локальный запуск)
+            if (pdfPath == null || !Files.exists(pdfPath)) {
+                pdfPath = Paths.get("src/main/resources/pdf");
+                if (!Files.exists(pdfPath)) {
+                    System.out.println("PDF directory not found. Skipping PDF processing.");
+                    return;
+                }
+            }
+
+            // Создаем папку для хранения PDF файлов если её нет
+            Path storageDir = Paths.get(pdfStoragePath);
+            if (!Files.exists(storageDir)) {
+                Files.createDirectories(storageDir);
+                System.out.println("Created PDF storage directory: " + pdfStoragePath);
+            }
+
+            // Получаем все книги из базы данных
+            List<Book> allBooks = bookRepository.findAll();
+
+            AtomicInteger processedCount = new AtomicInteger(0);
+            AtomicInteger matchedCount = new AtomicInteger(0);
+
+            // Проходим по всем файлам в папке pdf
+            if (Files.exists(pdfPath) && Files.isDirectory(pdfPath)) {
+                try (java.util.stream.Stream<Path> files = Files.list(pdfPath)) {
+                    files.filter(Files::isRegularFile)
+                            .filter(path -> {
+                                String fileName = path.getFileName().toString().toLowerCase();
+                                return fileName.endsWith(".pdf");
+                            })
+                            .forEach(pdfFile -> {
+                                try {
+                                    String pdfFileName = pdfFile.getFileName().toString();
+                                    // Убираем расширение для сравнения
+                                    String pdfNameWithoutExt = pdfFileName;
+                                    int lastDotIndex = pdfFileName.lastIndexOf('.');
+                                    if (lastDotIndex > 0) {
+                                        pdfNameWithoutExt = pdfFileName.substring(0, lastDotIndex);
+                                    }
+
+                                    // Нормализуем имя файла: заменяем _ на пробелы, приводим к нижнему регистру
+                                    String normalizedPdfName = pdfNameWithoutExt
+                                            .replaceAll("_", " ")
+                                            .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
+                                            .toLowerCase()
+                                            .trim();
+
+                                    // Ищем соответствующую книгу
+                                    for (Book book : allBooks) {
+                                        // Пропускаем книги, у которых уже есть PDF файл
+                                        if (book.getPdfPath() != null && !book.getPdfPath().isEmpty()) {
+                                            continue;
+                                        }
+
+                                        // Нормализуем название книги: приводим к нижнему регистру, нормализуем пробелы
+                                        String bookTitleNormalized = book.getTitle()
+                                                .replaceAll("\\s+", " ") // Нормализуем множественные пробелы
+                                                .toLowerCase()
+                                                .trim();
+
+                                        // Сравниваем нормализованные имена
+                                        if (normalizedPdfName.equals(bookTitleNormalized)) {
+                                            try {
+                                                // Получаем расширение файла
+                                                String extension = "";
+                                                if (lastDotIndex > 0) {
+                                                    extension = pdfFileName.substring(lastDotIndex);
+                                                }
+
+                                                // Формируем имя файла для сохранения (на основе названия книги)
+                                                // Заменяем пробелы на _, но сохраняем все символы включая русские
+                                                String sanitizedTitle = book.getTitle()
+                                                        .replaceAll("\\s+", "_")
+                                                        .replaceAll("[<>:\"|?*]", ""); // Удаляем только недопустимые символы для Windows/Linux
+                                                String targetFileName = sanitizedTitle + extension;
+
+                                                // Путь для сохранения
+                                                Path targetPath = storageDir.resolve(targetFileName);
+
+                                                // Если файл уже существует, не копируем заново и не меняем имя
+                                                if (Files.exists(targetPath)) {
+                                                    System.out.println("PDF file already exists, skipping copy: " + targetFileName);
+                                                } else {
+                                                    // Копируем файл (создаем новый)
+                                                    Files.copy(pdfFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                                                }
+
+                                                // Обновляем путь к PDF файлу в базе данных
+                                                book.setPdfPath(targetPath.toString());
+                                                bookRepository.save(book);
+
+                                                System.out.println("Matched and copied PDF for book: " + book.getTitle() + " -> " + targetFileName);
+                                                matchedCount.incrementAndGet();
+                                            } catch (IOException e) {
+                                                System.err.println("Failed to copy PDF for book " + book.getTitle() + ": " + e.getMessage());
+                                            }
+                                            break; // Нашли соответствие, переходим к следующему файлу
+                                        }
+                                    }
+                                    processedCount.incrementAndGet();
+                                } catch (Exception e) {
+                                    System.err.println("Error processing PDF file " + pdfFile.getFileName() + ": " + e.getMessage());
+                                }
+                            });
+                } catch (IOException e) {
+                    System.err.println("Error listing files in PDF directory: " + e.getMessage());
+                }
+            }
+
+            System.out.println("PDF processing completed: " + processedCount.get() + " files processed, " + matchedCount.get() + " PDFs matched and copied.");
+        } catch (Exception e) {
+            System.err.println("Error during PDF processing: " + e.getMessage());
             e.printStackTrace();
         }
     }

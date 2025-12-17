@@ -55,6 +55,9 @@ public class Book {
     @Column(name = "image_path")
     private String imagePath;
     
+    @Column(name = "pdf_path")
+    private String pdfPath;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
