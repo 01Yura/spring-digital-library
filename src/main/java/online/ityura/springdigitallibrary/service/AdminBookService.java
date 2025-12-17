@@ -7,7 +7,6 @@ import online.ityura.springdigitallibrary.dto.response.BookResponse;
 import online.ityura.springdigitallibrary.model.Author;
 import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.repository.AuthorRepository;
-import online.ityura.springdigitallibrary.repository.BookFileRepository;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import online.ityura.springdigitallibrary.repository.ReviewRepository;
 import online.ityura.springdigitallibrary.service.BookImageService;
@@ -29,9 +28,6 @@ public class AdminBookService {
     
     @Autowired
     private AuthorRepository authorRepository;
-    
-    @Autowired
-    private BookFileRepository bookFileRepository;
     
     @Autowired
     private ReviewRepository reviewRepository;
@@ -190,8 +186,9 @@ public class AdminBookService {
                     "Cannot delete book: it has reviews");
         }
         
-        // Удаление файла если есть
-        bookFileRepository.findByBookId(bookId).ifPresent(bookFileRepository::delete);
+        // Примечание: PDF файл хранится в файловой системе, 
+        // его можно удалить физически, но для простоты оставляем как есть
+        // (файл будет оставаться в файловой системе, но ссылка в БД удалится вместе с книгой)
         
         bookRepository.delete(book);
     }
@@ -221,8 +218,9 @@ public class AdminBookService {
                         "Cannot delete book with id " + bookId + ": it has reviews");
             }
             
-            // Удаляем файл если есть
-            bookFileRepository.findByBookId(bookId).ifPresent(bookFileRepository::delete);
+            // Примечание: PDF файл хранится в файловой системе, 
+            // его можно удалить физически, но для простоты оставляем как есть
+            // (файл будет оставаться в файловой системе, но ссылка в БД удалится вместе с книгой)
             
             // Удаляем книгу через репозиторий (соблюдает все проверки)
             bookRepository.delete(book);
@@ -233,7 +231,7 @@ public class AdminBookService {
     }
     
     private BookResponse mapToBookResponse(Book book) {
-        boolean hasFile = bookFileRepository.existsByBookId(book.getId());
+        boolean hasFile = book.getPdfPath() != null && !book.getPdfPath().isEmpty();
         
         return BookResponse.builder()
                 .id(book.getId())

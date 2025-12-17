@@ -6,7 +6,6 @@ import online.ityura.springdigitallibrary.dto.response.ReviewResponse;
 import online.ityura.springdigitallibrary.dto.response.UserInfoResponse;
 import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.model.Review;
-import online.ityura.springdigitallibrary.repository.BookFileRepository;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import online.ityura.springdigitallibrary.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,6 @@ public class BookService {
     
     @Autowired
     private BookRepository bookRepository;
-    
-    @Autowired
-    private BookFileRepository bookFileRepository;
     
     @Autowired
     private ReviewRepository reviewRepository;
@@ -50,7 +46,7 @@ public class BookService {
     }
     
     private BookResponse mapToBookResponse(Book book) {
-        boolean hasFile = bookFileRepository.existsByBookId(book.getId());
+        boolean hasFile = book.getPdfPath() != null && !book.getPdfPath().isEmpty();
         
         return BookResponse.builder()
                 .id(book.getId())
@@ -72,7 +68,7 @@ public class BookService {
     }
     
     private BookResponse mapToBookResponseWithReviews(Book book, List<ReviewResponse> reviews) {
-        boolean hasFile = bookFileRepository.existsByBookId(book.getId());
+        boolean hasFile = book.getPdfPath() != null && !book.getPdfPath().isEmpty();
         
         return BookResponse.builder()
                 .id(book.getId())

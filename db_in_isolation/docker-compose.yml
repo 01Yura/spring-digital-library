@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: POSTGRES_DB_SPRING_DIGITAL_BOOKSTORE
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nobugs228
+      POSTGRES_PASSWORD: nobugs228PASSWORD!#
+      POSTGRES_DB: spring_digital_bookstore
+    ports:
+      - "5432:5432"
+    # volumes:
+    #   - g:/yura/db_volumes/postgresql_for_spring:/var/lib/postgresql/data
