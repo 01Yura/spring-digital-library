@@ -1,5 +1,6 @@
 package online.ityura.springdigitallibrary.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -379,6 +380,7 @@ public class AdminBookController {
         return ResponseEntity.noContent().build();
     }
 
+    @Hidden // TODO: ВРЕМЕННО СКРЫТО ИЗ SWAGGER
     @Operation(
             summary = "Удалить автора и все его книги",
             description = "Удаляет автора и все его книги из каталога. " +
