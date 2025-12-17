@@ -166,40 +166,6 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByBookId(bookId, pageable));
     }
     
-    @Operation(
-            summary = "Получить свой отзыв на книгу",
-            description = "Возвращает отзыв текущего пользователя на указанную книгу."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Отзыв найден",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Отзыв не найден",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Review not found\"}")
-                    )
-            )
-    })
-    @GetMapping("/my")
-    public ResponseEntity<ReviewResponse> getMyReview(
-            @Parameter(description = "ID книги", example = "1", required = true)
-            @PathVariable Long bookId,
-            Authentication authentication) {
-        Long userId = getCurrentUserId(authentication);
-        return ResponseEntity.ok(reviewService.getMyReview(bookId, userId));
-    }
-    
     private Long getCurrentUserId(Authentication authentication) {
         String email = ((UserDetails) authentication.getPrincipal()).getUsername();
         return userRepository.findByEmail(email)
