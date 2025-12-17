@@ -404,6 +404,9 @@ public class DataInitializer implements CommandLineRunner {
 
     private void processBookPdfs() {
         try {
+            System.out.println("Starting PDF processing...");
+            System.out.println("PDF storage path: " + pdfStoragePath);
+            
             // Получаем путь к папке pdf в resources
             Resource pdfResource = resourceLoader.getResource("classpath:pdf");
             Path pdfPath = null;
@@ -414,35 +417,58 @@ public class DataInitializer implements CommandLineRunner {
                     java.io.File file = pdfResource.getFile();
                     if (file.exists() && file.isDirectory()) {
                         pdfPath = file.toPath();
+                        System.out.println("Found PDF source directory (classpath): " + pdfPath);
                     }
                 }
             } catch (Exception e) {
                 // Если не удалось получить как файл (например, в JAR), пробуем альтернативные пути
+                System.out.println("Could not access classpath:pdf as file (expected in JAR): " + e.getMessage());
             }
 
             // Альтернативный путь для работы внутри Docker-контейнера:
             // в Dockerfile мы копируем исходные PDF файлы в /opt/spring-digital-bookstore/pdf-source
             if (pdfPath == null || !Files.exists(pdfPath)) {
                 Path dockerPdfPath = Paths.get("/opt/spring-digital-bookstore/pdf-source");
+                System.out.println("Checking Docker PDF source path: " + dockerPdfPath);
                 if (Files.exists(dockerPdfPath) && Files.isDirectory(dockerPdfPath)) {
                     pdfPath = dockerPdfPath;
+                    System.out.println("Found PDF source directory (Docker): " + pdfPath);
+                } else {
+                    System.out.println("Docker PDF source directory does not exist: " + dockerPdfPath);
                 }
             }
 
             // Альтернативный способ получения пути для разработки (IDE / локальный запуск)
             if (pdfPath == null || !Files.exists(pdfPath)) {
                 pdfPath = Paths.get("src/main/resources/pdf");
+                System.out.println("Checking development PDF source path: " + pdfPath);
                 if (!Files.exists(pdfPath)) {
-                    System.out.println("PDF directory not found. Skipping PDF processing.");
+                    System.out.println("PDF directory not found in any location. Skipping PDF processing.");
+                    System.out.println("Checked paths:");
+                    System.out.println("  1. classpath:pdf");
+                    System.out.println("  2. /opt/spring-digital-bookstore/pdf-source");
+                    System.out.println("  3. src/main/resources/pdf");
                     return;
+                } else {
+                    System.out.println("Found PDF source directory (development): " + pdfPath);
                 }
             }
 
             // Создаем папку для хранения PDF файлов если её нет
             Path storageDir = Paths.get(pdfStoragePath);
+            System.out.println("PDF storage directory: " + storageDir);
             if (!Files.exists(storageDir)) {
-                Files.createDirectories(storageDir);
-                System.out.println("Created PDF storage directory: " + pdfStoragePath);
+                try {
+                    Files.createDirectories(storageDir);
+                    System.out.println("Created PDF storage directory: " + pdfStoragePath);
+                } catch (Exception e) {
+                    System.err.println("Failed to create PDF storage directory: " + pdfStoragePath);
+                    System.err.println("Error: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+            } else {
+                System.out.println("PDF storage directory already exists: " + pdfStoragePath);
             }
 
             // Получаем все книги из базы данных
@@ -452,7 +478,9 @@ public class DataInitializer implements CommandLineRunner {
             AtomicInteger matchedCount = new AtomicInteger(0);
 
             // Проходим по всем файлам в папке pdf
+            System.out.println("Processing PDF files from: " + pdfPath);
             if (Files.exists(pdfPath) && Files.isDirectory(pdfPath)) {
+                System.out.println("PDF source directory exists and is a directory");
                 try (java.util.stream.Stream<Path> files = Files.list(pdfPath)) {
                     files.filter(Files::isRegularFile)
                             .filter(path -> {
