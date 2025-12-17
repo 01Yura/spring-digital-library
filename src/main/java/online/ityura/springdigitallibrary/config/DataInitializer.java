@@ -134,13 +134,15 @@ public class DataInitializer implements CommandLineRunner {
                 new BookData("Friday Night With Jenkins", "CI Lover", "How pipelines replaced friends and hobbies", 2019, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("My Only Dates Are Deadlines", "Alex Turner", "A developer's guide to emotional availability via Jira", 2021, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("Living Alone With Legacy Code", "Refactor Ghost", "Why nobody touches it and everyone is afraid", 2018, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
-                new BookData("Weekend Plans: Fix Production", "OnCall Engineer", "Stories of canceled vacations and midnight alerts", 2020, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+                new BookData("Weekend Plans. Fix Production", "OnCall Engineer", "Stories of canceled vacations and " +
+                        "midnight alerts", 2020, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("Headphones On, World Off", "Silent Dev", "Escaping human interaction using noise cancellation", 2017, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("Burnout as a Feature", "Agile Survivor", "Why sprints never end and weekends don't exist", 2022, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("Alone in the Open Space", "Desk Nomad", "Surrounded by people, talking only to Slack", 2019, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("No Meetings, No Feelings", "Calendar Hater", "Emotional minimalism for remote developers", 2023, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("Side Projects and Silent Evenings", "Pet Projector", "Replacing social life with unfinished repositories", 2020, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
-                new BookData("404 Friends Not Found", "Alex Turner", "Advanced isolation techniques using code and excuses", 2018, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
+                new BookData("404. Friends Not Found", "Alex Turner", "Advanced isolation techniques using code and " +
+                        "excuses", 2018, Genre.FOR_PEOPLE_WITHOUT_PERSONAL_LIFE),
                 new BookData("The Commit That Should Not Exist", "Stephen Black", "A horror story about a mysterious commit in main branch", 2017, Genre.HORROR),
                 new BookData("Production at 3 AM", "Night Pager", "Every alert hides something unspeakable", 2021, Genre.HORROR),
                 new BookData("The Server Room Whispered Back", "Daemon Root", "Strange things happen when logs start writing themselves", 2019, Genre.HORROR),
