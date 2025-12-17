@@ -46,7 +46,16 @@ public class BookFileController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"File not found for book id: 1\"}")
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Книга не найдена",
+                                            value = "{\"message\":\"Book not found with id: 1000\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "PDF файл не найден",
+                                            value = "{\"message\":\"PDF file not found for book id: 1\"}"
+                                    )
+                            }
                     )
             ),
             @ApiResponse(

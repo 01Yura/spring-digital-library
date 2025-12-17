@@ -24,10 +24,15 @@ WORKDIR /app
 # DataInitializer будет использовать эту директорию как источник картинок при первом запуске.
 COPY src/main/resources/pictures /opt/spring-digital-bookstore/pictures-source
 
-# Создаем директорию для хранения изображений книг
-# Делаем это до переключения на пользователя spring, чтобы иметь права на создание директории
-# Если volume будет смонтирован, эта директория будет использована как точка монтирования
+# Копируем исходные PDF файлы книг в отдельную директорию внутри контейнера.
+# DataInitializer будет использовать эту директорию как источник PDF файлов при первом запуске.
+COPY src/main/resources/pdf /opt/spring-digital-bookstore/pdf-source
+
+# Создаем директории для хранения изображений и PDF файлов книг
+# Делаем это до переключения на пользователя spring, чтобы иметь права на создание директорий
+# Если volume будет смонтирован, эти директории будут использованы как точки монтирования
 RUN mkdir -p /opt/spring-digital-bookstore/pictures && \
+    mkdir -p /opt/spring-digital-bookstore/pdf && \
     chown -R spring:spring /opt/spring-digital-bookstore
 
 # Копируем JAR файл из этапа сборки

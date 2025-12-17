@@ -56,11 +56,15 @@ services:
 
       # Путь для хранения изображений книг
       APP_IMAGES_STORAGE_PATH: /opt/spring-digital-bookstore/pictures
+      # Путь для хранения PDF файлов книг
+      APP_PDF_STORAGE_PATH: /opt/spring-digital-bookstore/pdf
     ports:
       - "8088:8080"
     volumes:
       # Хранение изображений книг в обычной директории на хосте
       - /opt/spring-digital-bookstore/pictures:/opt/spring-digital-bookstore/pictures
+      # Хранение PDF файлов книг в обычной директории на хосте
+      - /opt/spring-digital-bookstore/pdf:/opt/spring-digital-bookstore/pdf
     networks:
       - spring-library-network
     depends_on:

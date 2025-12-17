@@ -14,6 +14,14 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -61,6 +69,7 @@ public class SecurityConfig {
                 // GET запросы к списку отзывов - публичные
                 .requestMatchers(HttpMethod.GET, "/api/v1/books/*/reviews").permitAll()
                 // Эндпоинты, требующие авторизацию (используем * вместо ** в середине)
+                .requestMatchers("/api/v1/books/*/download").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/books/*/ratings/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/books/*/reviews/**").hasAnyRole("USER", "ADMIN")
                 // Остальные эндпоинты книг (например, /api/v1/books/{id}) - публичные
@@ -69,6 +78,38 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(new AuthenticationEntryPoint() {
+                    @Override
+                    public void commence(HttpServletRequest request, HttpServletResponse response,
+                            AuthenticationException authException) throws IOException {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"message\":\"Unauthorized\"}");
+                    }
+                })
+                .accessDeniedHandler(new AccessDeniedHandler() {
+                    @Override
+                    public void handle(HttpServletRequest request, HttpServletResponse response,
+                            AccessDeniedException accessDeniedException) throws IOException {
+                        // Если пользователь не авторизован, возвращаем 401, иначе 403
+                        if (SecurityContextHolder.getContext().getAuthentication() == null ||
+                            !SecurityContextHolder.getContext().getAuthentication().isAuthenticated() ||
+                            "anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"message\":\"Unauthorized\"}");
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"message\":\"Forbidden\"}");
+                        }
+                    }
+                })
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
