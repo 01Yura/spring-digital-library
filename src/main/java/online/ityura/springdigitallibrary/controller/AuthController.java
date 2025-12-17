@@ -125,7 +125,11 @@ public class AuthController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"refreshToken\":\"Refresh token is required\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",

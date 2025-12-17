@@ -54,7 +54,11 @@ public class ReviewController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"text\":\"Review text is required\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -100,7 +104,11 @@ public class ReviewController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"text\":\"Review text is required\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",

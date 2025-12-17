@@ -50,7 +50,11 @@ public class RatingController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверное значение рейтинга (должно быть 1-10)",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"value\":\"Rating must be at least 1\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -96,7 +100,11 @@ public class RatingController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверное значение рейтинга",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"value\":\"Rating must be at most 10\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",

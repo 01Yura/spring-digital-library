@@ -52,7 +52,11 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be at least 1000\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -96,7 +100,11 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -137,7 +145,11 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -192,7 +204,11 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -248,7 +264,11 @@ public class AdminBookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Неверный формат данных или файл слишком большой",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"errors\":{\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -374,7 +394,7 @@ public class AdminBookController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed\"}")
+                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed by admin\"}")
                     )
             ),
             @ApiResponse(
@@ -383,7 +403,7 @@ public class AdminBookController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book has reviews\"}")
+                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed, because the book has reviews\"}")
                     )
             )
     })
