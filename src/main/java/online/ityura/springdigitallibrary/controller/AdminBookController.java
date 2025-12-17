@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 import online.ityura.springdigitallibrary.dto.request.CreateBookRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateBookRequest;
 import online.ityura.springdigitallibrary.dto.response.BookResponse;
+import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.dto.response.MessageResponse;
-import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.AdminBookService;
 import online.ityura.springdigitallibrary.service.BookImageService;
 import org.springframework.http.HttpStatus;
@@ -54,8 +54,8 @@ public class AdminBookController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be at least 1000\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be at least 1000\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books\"}")
                     )
             ),
             @ApiResponse(
@@ -63,8 +63,8 @@ public class AdminBookController {
                     description = "Недостаточно прав (требуется роль ADMIN)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions (ADMIN role required)\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books\"}")
                     )
             ),
             @ApiResponse(
@@ -72,8 +72,8 @@ public class AdminBookController {
                     description = "Книга с таким названием и автором уже существует",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_ALREADY_EXISTS\",\"message\":\"Book with this title and author already exists\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books\"}")
                     )
             )
     })
@@ -102,8 +102,8 @@ public class AdminBookController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/batch\"}")
                     )
             ),
             @ApiResponse(
@@ -111,8 +111,8 @@ public class AdminBookController {
                     description = "Недостаточно прав (требуется роль ADMIN)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions (ADMIN role required)\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/batch\"}")
                     )
             ),
             @ApiResponse(
@@ -120,8 +120,8 @@ public class AdminBookController {
                     description = "Одна из книг с таким названием и автором уже существует",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_ALREADY_EXISTS\",\"message\":\"Book with this title and author already exists\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/batch\"}")
                     )
             )
     })
@@ -147,8 +147,8 @@ public class AdminBookController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -156,8 +156,8 @@ public class AdminBookController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -165,8 +165,8 @@ public class AdminBookController {
                     description = "Недостаточно прав",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions (ADMIN role required)\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -174,8 +174,8 @@ public class AdminBookController {
                     description = "Конфликт уникальности",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_ALREADY_EXISTS\",\"message\":\"Book with this title and author already exists\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             )
     })
@@ -206,8 +206,8 @@ public class AdminBookController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -215,8 +215,8 @@ public class AdminBookController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -224,8 +224,8 @@ public class AdminBookController {
                     description = "Недостаточно прав",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions (ADMIN role required)\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -233,8 +233,8 @@ public class AdminBookController {
                     description = "Конфликт уникальности",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_ALREADY_EXISTS\",\"message\":\"Book with this title and author already exists\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             )
     })
@@ -266,8 +266,8 @@ public class AdminBookController {
                     description = "Неверный формат данных или файл слишком большой",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"publishedYear\":\"Published year must be beetween 1000-9999\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -275,8 +275,8 @@ public class AdminBookController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -284,8 +284,8 @@ public class AdminBookController {
                     description = "Недостаточно прав",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions (ADMIN role required)\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -293,8 +293,8 @@ public class AdminBookController {
                     description = "Конфликт уникальности",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book with this title and author already exists\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"BOOK_ALREADY_EXISTS\",\"message\":\"Book with this title and author already exists\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             )
     })
@@ -347,8 +347,8 @@ public class AdminBookController {
                     description = "Удаление запрещено (deletion_locked или есть отзывы)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Deletion is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             ),
             @ApiResponse(
@@ -356,8 +356,8 @@ public class AdminBookController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
                     )
             )
     })
@@ -384,8 +384,8 @@ public class AdminBookController {
                     description = "Автор не найден",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Author not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"AUTHOR_NOT_FOUND\",\"message\":\"Author not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
                     )
             ),
             @ApiResponse(
@@ -393,8 +393,8 @@ public class AdminBookController {
                     description = "Удаление запрещено (deletion_locked или есть отзывы)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed by admin\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Deletion is not allowed by admin\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
                     )
             ),
             @ApiResponse(
@@ -402,8 +402,8 @@ public class AdminBookController {
                     description = "Конфликт (книга имеет отзывы)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Deletion is not allowed, because the book has reviews\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Deletion is not allowed, because the book has reviews\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/authors/1\"}")
                     )
             )
     })
@@ -437,8 +437,8 @@ public class AdminBookController {
                     description = "Неверный формат данных или файл слишком большой",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Invalid file format or file too large\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Invalid file format or file too large\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1/image\"}")
                     )
             ),
             @ApiResponse(
@@ -446,8 +446,8 @@ public class AdminBookController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1/image\"}")
                     )
             ),
             @ApiResponse(
@@ -455,8 +455,8 @@ public class AdminBookController {
                     description = "Недостаточно прав (требуется роль ADMIN)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Access Denied\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":403,\"error\":\"ACCESS_DENIED\",\"message\":\"Insufficient permissions (ADMIN role required)\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1/image\"}")
                     )
             )
     })

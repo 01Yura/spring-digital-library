@@ -1,7 +1,7 @@
 package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.response.BookResponse;
-import online.ityura.springdigitallibrary.dto.response.MessageResponse;
+import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.service.BookImageService;
 import online.ityura.springdigitallibrary.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,8 +76,8 @@ public class BookController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1\"}")
                     )
             )
     })
@@ -105,8 +105,8 @@ public class BookController {
                     description = "Книга или изображение не найдены",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Image not found for book id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"NOT_FOUND\",\"message\":\"Image not found for book id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/image\"}")
                     )
             )
     })
@@ -170,8 +170,8 @@ public class BookController {
                     description = "Не найдено книг с изображениями",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"No books with images found\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"NOT_FOUND\",\"message\":\"No books with images found\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/images/all\"}")
                     )
             )
     })

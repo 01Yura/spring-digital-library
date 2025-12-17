@@ -1,6 +1,6 @@
 package online.ityura.springdigitallibrary.controller;
 
-import online.ityura.springdigitallibrary.dto.response.MessageResponse;
+import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.service.BookFileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,15 +45,15 @@ public class BookFileController {
                     description = "Книга или файл не найдены",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
                                             name = "Книга не найдена",
-                                            value = "{\"message\":\"Book not found with id: 1000\"}"
+                                            value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1000\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1000/download\"}"
                                     ),
                                     @ExampleObject(
                                             name = "PDF файл не найден",
-                                            value = "{\"message\":\"PDF file not found for book id: 1\"}"
+                                            value = "{\"status\":404,\"error\":\"NOT_FOUND\",\"message\":\"PDF file not found for book id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/download\"}"
                                     )
                             }
                     )
@@ -63,8 +63,8 @@ public class BookFileController {
                     description = "Не авторизован",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Unauthorized\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":401,\"error\":\"UNAUTHORIZED\",\"message\":\"Unauthorized\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/download\"}")
                     )
             )
     })

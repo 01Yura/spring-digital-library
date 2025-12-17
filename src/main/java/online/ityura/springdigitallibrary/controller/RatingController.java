@@ -2,9 +2,8 @@ package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.request.CreateRatingRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateRatingRequest;
-import online.ityura.springdigitallibrary.dto.response.MessageResponse;
+import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.dto.response.RatingResponse;
-import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.RatingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,8 +51,8 @@ public class RatingController {
                     description = "Неверное значение рейтинга (должно быть 1-10)",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"value\":\"Rating must be at least 1\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"value\":\"Rating must be at least 1\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/ratings\"}")
                     )
             ),
             @ApiResponse(
@@ -61,8 +60,8 @@ public class RatingController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/ratings\"}")
                     )
             ),
             @ApiResponse(
@@ -70,8 +69,8 @@ public class RatingController {
                     description = "Рейтинг уже существует для этой книги",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Rating already exists for this book\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"RATING_ALREADY_EXISTS\",\"message\":\"Rating already exists for this book\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/ratings\"}")
                     )
             )
     })
@@ -102,8 +101,8 @@ public class RatingController {
                     description = "Неверное значение рейтинга",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"value\":\"Rating must be at most 10\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"value\":\"Rating must be at most 10\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/ratings/my\"}")
                     )
             ),
             @ApiResponse(
@@ -111,8 +110,8 @@ public class RatingController {
                     description = "Рейтинг не найден",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Rating not found\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"RATING_NOT_FOUND\",\"message\":\"Rating not found\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/ratings/my\"}")
                     )
             )
     })

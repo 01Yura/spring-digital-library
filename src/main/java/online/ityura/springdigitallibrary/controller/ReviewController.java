@@ -2,9 +2,8 @@ package online.ityura.springdigitallibrary.controller;
 
 import online.ityura.springdigitallibrary.dto.request.CreateReviewRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateReviewRequest;
-import online.ityura.springdigitallibrary.dto.response.MessageResponse;
+import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.dto.response.ReviewResponse;
-import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,8 +55,8 @@ public class ReviewController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"text\":\"Review text is required\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"text\":\"Review text is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews\"}")
                     )
             ),
             @ApiResponse(
@@ -65,8 +64,8 @@ public class ReviewController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Book not found with id: 1\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews\"}")
                     )
             ),
             @ApiResponse(
@@ -74,8 +73,8 @@ public class ReviewController {
                     description = "Отзыв уже существует для этой книги",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Review already exists for this book\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"REVIEW_ALREADY_EXISTS\",\"message\":\"Review already exists for this book\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews\"}")
                     )
             )
     })
@@ -106,8 +105,8 @@ public class ReviewController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"text\":\"Review text is required\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"text\":\"Review text is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews/my\"}")
                     )
             ),
             @ApiResponse(
@@ -115,8 +114,8 @@ public class ReviewController {
                     description = "Отзыв не найден",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Review not found\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"REVIEW_NOT_FOUND\",\"message\":\"Review not found\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews/my\"}")
                     )
             )
     })
@@ -150,16 +149,16 @@ public class ReviewController {
                     description = "Книга не найдена или отзывы отсутствуют",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
+                            schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
                                             name = "Book not found",
-                                            value = "{\"message\":\"Book not found with id: 1\"}",
+                                            value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews\"}",
                                             summary = "Книга не найдена"
                                     ),
                                     @ExampleObject(
                                             name = "No reviews found",
-                                            value = "{\"message\":\"No reviews found for book with id: 1\"}",
+                                            value = "{\"status\":404,\"error\":\"NOT_FOUND\",\"message\":\"No reviews found for book with id: 1\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/1/reviews\"}",
                                             summary = "Отзывы отсутствуют"
                                     )
                             }

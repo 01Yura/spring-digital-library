@@ -3,10 +3,9 @@ package online.ityura.springdigitallibrary.controller;
 import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
+import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
-import online.ityura.springdigitallibrary.dto.response.MessageResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
-import online.ityura.springdigitallibrary.dto.response.ValidationErrorResponse;
 import online.ityura.springdigitallibrary.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,11 +44,11 @@ public class AuthController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных (ключ errors содержит только те поля, которые не прошли валидацию, и может включать одно или несколько полей)",
+                    description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"password\":\"Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long\",\"nickname\":\"Nickname must contain only letters, digits, dashes, underscores, and dots. Spaces and other special characters are not allowed\",\"email\":\"Email should be valid\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"password\":\"Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long\",\"nickname\":\"Nickname must contain only letters, digits, dashes, underscores, and dots. Spaces and other special characters are not allowed\",\"email\":\"Email should be valid\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/auth/register\"}")
                     )
             ),
             @ApiResponse(
@@ -57,8 +56,8 @@ public class AuthController {
                     description = "Email уже существует",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Email already exists\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":409,\"error\":\"EMAIL_ALREADY_EXISTS\",\"message\":\"Email already exists\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/auth/register\"}")
                     )
             )
     })
@@ -87,8 +86,8 @@ public class AuthController {
                     description = "Неверные учетные данные",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Bad credentials\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":401,\"error\":\"UNAUTHORIZED\",\"message\":\"Bad credentials\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/auth/login\"}")
                     )
             ),
             @ApiResponse(
@@ -96,8 +95,8 @@ public class AuthController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"email\":\"Email should be valid\",\"password\":\"Password is required\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"email\":\"Email should be valid\",\"password\":\"Password is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/auth/login\"}")
                     )
             )
     })
@@ -127,8 +126,8 @@ public class AuthController {
                     description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ValidationErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"errors\":{\"refreshToken\":\"Refresh token is required\"}}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"refreshToken\":\"Refresh token is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/auth/refresh\"}")
                     )
             ),
             @ApiResponse(
@@ -136,8 +135,8 @@ public class AuthController {
                     description = "Refresh токен недействителен или истек",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"message\":\"Refresh token is expired or invalid\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":401,\"error\":\"UNAUTHORIZED\",\"message\":\"Refresh token is expired or invalid\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/auth/refresh\"}")
                     )
             )
     })
