@@ -47,7 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (requestPath.startsWith("/api/v1/books") && 
             (requestPath.equals("/api/v1/books") || 
              requestPath.matches("/api/v1/books/\\d+/image") ||
-             requestPath.equals("/api/v1/books/images/all"))) {
+             requestPath.equals("/api/v1/books/images/all") ||
+             (request.getMethod().equals("GET") && requestPath.matches("/api/v1/books/\\d+/reviews")))) {
             filterChain.doFilter(request, response);
             return;
         }

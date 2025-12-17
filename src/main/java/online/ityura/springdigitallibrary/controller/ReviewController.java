@@ -32,7 +32,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1/books/{bookId}/reviews")
 @Tag(name = "Отзывы", description = "API для управления отзывами на книги")
-@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class ReviewController {
     
@@ -45,6 +44,7 @@ public class ReviewController {
             description = "Создает отзыв текущего пользователя на указанную книгу. " +
                     "Один пользователь может оставить только один отзыв на книгу."
     )
+    @SecurityRequirement(name = "Bearer Authentication")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
@@ -90,6 +90,7 @@ public class ReviewController {
             summary = "Обновить свой отзыв",
             description = "Обновляет текст отзыва текущего пользователя на указанную книгу."
     )
+    @SecurityRequirement(name = "Bearer Authentication")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -123,7 +124,7 @@ public class ReviewController {
     }
     
     @Operation(
-            summary = "Получить список отзывов на книгу",
+            summary = "Получить список отзывов на книгу (доступно без авторизации)",
             description = "Возвращает пагинированный список всех отзывов на указанную книгу с возможностью сортировки. " +
                     "Параметры пагинации: `page` (номер страницы, по умолчанию 0), `size` (размер страницы, по умолчанию 20), " +
                     "`sort` (сортировка, по умолчанию `createdAt,desc` - новые первыми). " +
