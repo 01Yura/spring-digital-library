@@ -3,9 +3,11 @@ package online.ityura.springdigitallibrary.exception;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -85,6 +87,49 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
     
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
+        String message = "Invalid request format";
+        String errorCode = "VALIDATION_ERROR";
+        
+        // Проверяем, связана ли ошибка с неверным enum (например, жанром)
+        Throwable cause = ex.getCause();
+        if (cause instanceof InvalidFormatException) {
+            InvalidFormatException invalidFormatException = (InvalidFormatException) cause;
+            String targetType = invalidFormatException.getTargetType() != null 
+                    ? invalidFormatException.getTargetType().getSimpleName() 
+                    : "";
+            String invalidValue = invalidFormatException.getValue() != null 
+                    ? invalidFormatException.getValue().toString() 
+                    : "";
+            
+            if (targetType.equals("Genre")) {
+                message = "Invalid genre: " + invalidValue + ". Please use one of the valid genre values.";
+                errorCode = "INVALID_GENRE";
+            } else {
+                message = "Invalid value for field: " + invalidValue + " (expected " + targetType + ")";
+            }
+        } else if (ex.getMessage() != null && ex.getMessage().contains("Genre")) {
+            // Fallback: если сообщение содержит упоминание Genre
+            message = "Invalid genre value. Please use one of the valid genre values.";
+            errorCode = "INVALID_GENRE";
+        }
+        
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(errorCode)
+                .message(message)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
+    
     private String determineErrorCode(HttpStatus status, String message) {
         if (message == null) {
             message = "";
@@ -92,7 +137,14 @@ public class GlobalExceptionHandler {
         String lowerMessage = message.toLowerCase();
         
         return switch (status) {
-            case BAD_REQUEST -> "VALIDATION_ERROR";
+            case BAD_REQUEST -> {
+                if (lowerMessage.contains("cannot change author") || lowerMessage.contains("author modification is not allowed")) {
+                    yield "AUTHOR_CHANGE_NOT_ALLOWED";
+                } else if (lowerMessage.contains("invalid genre")) {
+                    yield "INVALID_GENRE";
+                }
+                yield "VALIDATION_ERROR";
+            }
             case UNAUTHORIZED -> "UNAUTHORIZED";
             case FORBIDDEN -> "ACCESS_DENIED";
             case NOT_FOUND -> {

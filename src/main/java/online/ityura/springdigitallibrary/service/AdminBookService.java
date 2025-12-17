@@ -151,6 +151,12 @@ public class AdminBookService {
     
     @Transactional
     public BookResponse patchBook(Long bookId, UpdateBookRequest request, MultipartFile imageFile) {
+        // Проверка: нельзя изменять автора через PATCH
+        if (request.getAuthorName() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Cannot change author: author modification is not allowed");
+        }
+        
         // Сначала обновляем поля книги
         BookResponse response = updateBook(bookId, request);
         

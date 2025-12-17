@@ -52,11 +52,20 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных",
+                    description = "Неверный формат данных или несуществующий жанр",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be at least 1000\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books\"}")
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Validation error",
+                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be at least 1000\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Invalid genre",
+                                            value = "{\"status\":400,\"error\":\"INVALID_GENRE\",\"message\":\"Invalid genre: INVALID_GENRE_VALUE. Please use one of the valid genre values.\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books\"}"
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
@@ -84,6 +93,7 @@ public class AdminBookController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Hidden // TODO: ВРЕМЕННО СКРЫТО ИЗ SWAGGER
     @Operation(
             summary = "Создать несколько книг одновременно",
             description = "Создает несколько книг в каталоге за один запрос. Передайте массив объектов CreateBookRequest. " +
@@ -100,11 +110,20 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных",
+                    description = "Неверный формат данных или несуществующий жанр",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/batch\"}")
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Validation error",
+                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/batch\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Invalid genre",
+                                            value = "{\"status\":400,\"error\":\"INVALID_GENRE\",\"message\":\"Invalid genre: INVALID_GENRE_VALUE. Please use one of the valid genre values.\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/batch\"}"
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
@@ -192,7 +211,8 @@ public class AdminBookController {
     @Operation(
             summary = "Частично обновить информацию о книге",
             description = "Частично обновляет информацию о существующей книге. Все поля опциональны. " +
-                    "При изменении title или author проверяется уникальность. " +
+                    "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
+                    "При изменении title проверяется уникальность. " +
                     "Для обновления изображения используйте PATCH с multipart/form-data. " +
                     "Требуется роль ADMIN."
     )
@@ -204,11 +224,20 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных",
+                    description = "Неверный формат данных или попытка изменить автора",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Validation error",
+                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Author change not allowed",
+                                            value = "{\"status\":400,\"error\":\"AUTHOR_CHANGE_NOT_ALLOWED\",\"message\":\"Cannot change author: author modification is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
@@ -252,7 +281,8 @@ public class AdminBookController {
             summary = "Частично обновить информацию о книге с изображением (multipart/form-data)",
             description = "Частично обновляет информацию о существующей книге и/или изображение. " +
                     "Все поля опциональны. Можно обновить только поля, только изображение, или и то и другое. " +
-                    "При изменении title или author проверяется уникальность. " +
+                    "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
+                    "При изменении title проверяется уникальность. " +
                     "Изображение должно быть в формате multipart/form-data, размером не более 5MB. " +
                     "Требуется роль ADMIN."
     )
@@ -264,11 +294,20 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных или файл слишком большой",
+                    description = "Неверный формат данных, файл слишком большой или попытка изменить автора",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Validation error",
+                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Author change not allowed",
+                                            value = "{\"status\":400,\"error\":\"AUTHOR_CHANGE_NOT_ALLOWED\",\"message\":\"Cannot change author: author modification is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
@@ -305,7 +344,7 @@ public class AdminBookController {
             @PathVariable Long bookId,
             @Parameter(description = "Название книги", required = false)
             @RequestParam(value = "title", required = false) String title,
-            @Parameter(description = "Полное имя автора", required = false)
+            @Parameter(description = "Полное имя автора (изменение запрещено, будет возвращена ошибка 400)", required = false)
             @RequestParam(value = "authorName", required = false) String authorName,
             @Parameter(description = "Описание книги", required = false)
             @RequestParam(value = "description", required = false) String description,
