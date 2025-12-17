@@ -15,9 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -631,6 +635,7 @@ public class DataInitializer implements CommandLineRunner {
 
         int reviewIndex = 0;
         int reviewsAdded = 0;
+        Set<Long> booksWithRatings = new HashSet<>(); // Отслеживаем книги, для которых создали рейтинги
 
         // Добавляем отзывы к каждой второй книге (начиная с индекса 1: 1, 3, 5, 7...)
         for (int i = 1; i < savedBooks.size(); i += 2) {
@@ -671,13 +676,46 @@ public class DataInitializer implements CommandLineRunner {
                             .value(ratingValue)
                             .build();
                     ratingRepository.save(rating);
+                    booksWithRatings.add(book.getId()); // Запоминаем книгу с рейтингом
                 }
 
                 reviewsAdded++;
             }
         }
 
+        // Пересчитываем рейтинги для всех книг, у которых были созданы рейтинги
+        updateBookRatings(booksWithRatings);
+
         System.out.println("Funny reviews initialization completed: " + reviewsAdded + " reviews added.");
+    }
+
+    private void updateBookRatings(Set<Long> bookIds) {
+        int updatedCount = 0;
+        for (Long bookId : bookIds) {
+            try {
+                Book book = bookRepository.findById(bookId).orElse(null);
+                if (book == null) {
+                    continue;
+                }
+
+                Double avgRating = ratingRepository.calculateAverageRating(bookId);
+                long count = ratingRepository.countByBookId(bookId);
+
+                if (avgRating != null) {
+                    book.setRatingAvg(BigDecimal.valueOf(avgRating)
+                            .setScale(2, RoundingMode.HALF_UP));
+                } else {
+                    book.setRatingAvg(BigDecimal.ZERO);
+                }
+                book.setRatingCount((int) count);
+
+                bookRepository.save(book);
+                updatedCount++;
+            } catch (Exception e) {
+                System.err.println("Error updating rating for book id " + bookId + ": " + e.getMessage());
+            }
+        }
+        System.out.println("Book ratings updated: " + updatedCount + " books.");
     }
 
     private User getOrCreateUser(String nickname, String email) {
