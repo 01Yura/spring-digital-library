@@ -21,7 +21,7 @@ READONLY_USER="${READONLY_USER:-${1:-readonly_user}}"
 if [ -z "$READONLY_PASSWORD" ] && [ -n "$2" ]; then
     READONLY_PASSWORD="$2"
 elif [ -z "$READONLY_PASSWORD" ]; then
-    READONLY_PASSWORD="readonly_password_$(date +%s | sha256sum | base64 | head -c 16)"
+    READONLY_PASSWORD="pass_123_XYZ!"
 fi
 
 # Цвета для вывода
