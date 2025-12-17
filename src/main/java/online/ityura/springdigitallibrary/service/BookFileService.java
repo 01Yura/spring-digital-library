@@ -1,7 +1,6 @@
 package online.ityura.springdigitallibrary.service;
 
-import online.ityura.springdigitallibrary.model.BookFile;
-import online.ityura.springdigitallibrary.repository.BookFileRepository;
+import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -17,46 +16,60 @@ import java.nio.file.Paths;
 public class BookFileService {
     
     @Autowired
-    private BookFileRepository bookFileRepository;
-    
-    @Autowired
     private BookRepository bookRepository;
     
     public Resource downloadBookFile(Long bookId) {
-        // Проверяем существование книги
-        if (!bookRepository.existsById(bookId)) {
+        // Получаем книгу из базы данных
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Book not found with id: " + bookId));
+        
+        // Проверяем, есть ли PDF файл у книги
+        if (book.getPdfPath() == null || book.getPdfPath().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                    "Book not found with id: " + bookId);
+                    "PDF file not found for book id: " + bookId);
         }
         
-        BookFile bookFile = bookFileRepository.findByBookId(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                        "File not found for book id: " + bookId));
-        
         try {
-            Path filePath = Paths.get(bookFile.getFilePath());
+            Path filePath = Paths.get(book.getPdfPath());
             Resource resource = new UrlResource(filePath.toUri());
             
             if (resource.exists() && resource.isReadable()) {
                 return resource;
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                        "File not found or not readable");
+                        "PDF file not found or not readable at path: " + book.getPdfPath());
             }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                    "Error reading file: " + e.getMessage());
+                    "Error reading PDF file: " + e.getMessage());
         }
     }
     
     public String getOriginalFilename(Long bookId) {
-        BookFile bookFile = bookFileRepository.findByBookId(bookId)
+        // Получаем книгу из базы данных
+        Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                        "File not found for book id: " + bookId));
+                        "Book not found with id: " + bookId));
         
-        return bookFile.getOriginalFilename() != null 
-                ? bookFile.getOriginalFilename() 
-                : "book_" + bookId + ".pdf";
+        // Проверяем, есть ли PDF файл у книги
+        if (book.getPdfPath() == null || book.getPdfPath().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "PDF file not found for book id: " + bookId);
+        }
+        
+        // Извлекаем имя файла из пути
+        Path filePath = Paths.get(book.getPdfPath());
+        String filename = filePath.getFileName().toString();
+        
+        // Если имя файла не найдено, формируем на основе названия книги
+        if (filename == null || filename.isEmpty()) {
+            filename = book.getTitle()
+                    .replaceAll("\\s+", "_")
+                    .replaceAll("[<>:\"|?*]", "") + ".pdf";
+        }
+        
+        return filename;
     }
 }
 
