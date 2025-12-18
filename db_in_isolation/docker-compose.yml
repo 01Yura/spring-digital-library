@@ -9,4 +9,4 @@ services:
     ports:
       - "5432:5432"
     # volumes:
-    #   - g:/yura/db_volumes/postgresql_for_spring:/var/lib/postgresql/data
+    #   - g:/yura/db_volumes/postgresql_for_spring-digital-bookstore:/var/lib/postgresql/data

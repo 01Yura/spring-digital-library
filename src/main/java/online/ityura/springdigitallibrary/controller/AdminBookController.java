@@ -154,7 +154,8 @@ public class AdminBookController {
     @Operation(
             summary = "Обновить информацию о книге",
             description = "Обновляет информацию о существующей книге. Все поля опциональны. " +
-                    "При изменении title или author проверяется уникальность. Требуется роль ADMIN."
+                    "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
+                    "При изменении title проверяется уникальность. Требуется роль ADMIN."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -164,11 +165,20 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных",
+                    description = "Неверный формат данных или попытка изменить автора",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"authorName\":\"Author name is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}")
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Validation error",
+                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Author change not allowed",
+                                            value = "{\"status\":400,\"error\":\"AUTHOR_CHANGE_NOT_ALLOWED\",\"message\":\"Cannot change author: author modification is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                                    )
+                            }
                     )
             ),
             @ApiResponse(

@@ -105,24 +105,10 @@ public class AdminBookService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                         "Book not found with id: " + bookId));
         
-        // Обновление автора если нужно
-        if (request.getAuthorName() != null && !request.getAuthorName().equals(book.getAuthor().getFullName())) {
-            Author author = authorRepository.findByFullName(request.getAuthorName())
-                    .orElseGet(() -> {
-                        Author newAuthor = Author.builder()
-                                .fullName(request.getAuthorName())
-                                .build();
-                        return authorRepository.save(newAuthor);
-                    });
-            
-            // Проверка уникальности если меняется title или author
-            if (request.getTitle() != null && !request.getTitle().equals(book.getTitle())) {
-                if (bookRepository.existsByTitleAndAuthorId(request.getTitle(), author.getId())) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                            "Book with this title and author already exists");
-                }
-            }
-            book.setAuthor(author);
+        // Проверка: нельзя изменять автора через PUT
+        if (request.getAuthorName() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Cannot change author: author modification is not allowed");
         }
         
         if (request.getTitle() != null) {
