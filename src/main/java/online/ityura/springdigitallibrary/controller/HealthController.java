@@ -17,7 +17,7 @@ import java.lang.management.ManagementFactory;
 import java.time.Instant;
 
 @RestController
-@Tag(name = "system", description = "Системные эндпоинты для мониторинга и диагностики (доступно без авторизации)")
+@Tag(name = "System", description = "Системные эндпоинты для мониторинга и диагностики (доступно без авторизации)")
 public class HealthController {
 
     @GetMapping("/api/v1/health")
