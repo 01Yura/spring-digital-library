@@ -25,6 +25,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r JOIN FETCH r.user JOIN FETCH r.book WHERE r.book.id = :bookId ORDER BY r.createdAt DESC")
     List<Review> findByBookIdWithUserOrderByCreatedAtDesc(@Param("bookId") Long bookId);
     
+    @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.book.id IN :bookIds ORDER BY r.book.id, r.createdAt DESC")
+    List<Review> findByBookIdIn(@Param("bookIds") List<Long> bookIds);
+    
     @EntityGraph(attributePaths = {"user", "book"})
     Page<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }

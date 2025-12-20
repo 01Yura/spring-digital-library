@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,8 +29,30 @@ public class BookService {
     private ReviewRepository reviewRepository;
     
     public Page<BookResponse> getAllBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable)
-                .map(this::mapToBookResponse);
+        Page<Book> booksPage = bookRepository.findAll(pageable);
+        
+        // Загружаем все отзывы для всех книг на странице одним запросом (избегаем N+1 проблемы)
+        List<Long> bookIds = booksPage.getContent().stream()
+                .map(Book::getId)
+                .collect(Collectors.toList());
+        
+        // Загружаем отзывы для всех книг на странице (если есть книги)
+        Map<Long, List<ReviewResponse>> reviewsByBookId;
+        if (bookIds.isEmpty()) {
+            reviewsByBookId = Map.of();
+        } else {
+            reviewsByBookId = reviewRepository.findByBookIdIn(bookIds).stream()
+                    .collect(Collectors.groupingBy(
+                            review -> review.getBook().getId(),
+                            Collectors.mapping(this::mapToReviewResponse, Collectors.toList())
+                    ));
+        }
+        
+        // Маппим книги с отзывами
+        return booksPage.map(book -> {
+            List<ReviewResponse> reviews = reviewsByBookId.getOrDefault(book.getId(), List.of());
+            return mapToBookResponseWithReviews(book, reviews);
+        });
     }
     
     public BookResponse getBookById(Long bookId) {
