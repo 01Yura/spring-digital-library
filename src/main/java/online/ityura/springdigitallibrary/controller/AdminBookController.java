@@ -218,8 +218,7 @@ public class AdminBookController {
     @Operation(
             summary = "Частично обновить информацию о книге",
             description = "Частично обновляет информацию о существующей книге. Все поля опциональны. " +
-                    "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
-                    "При изменении title проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
+                    "При изменении title или author проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
                     "Для обновления изображения используйте PATCH с multipart/form-data. " +
                     "Требуется роль ADMIN."
     )
@@ -231,20 +230,14 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных или попытка изменить автора",
+                    description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Validation error",
-                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
-                                    ),
-                                    @ExampleObject(
-                                            name = "Author change not allowed",
-                                            value = "{\"status\":400,\"error\":\"AUTHOR_CHANGE_NOT_ALLOWED\",\"message\":\"Cannot change author: author modification is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
-                                    )
-                            }
+                            examples = @ExampleObject(
+                                    name = "Validation error",
+                                    value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                            )
                     )
             ),
             @ApiResponse(
@@ -288,8 +281,8 @@ public class AdminBookController {
             summary = "Частично обновить информацию о книге с изображением (multipart/form-data)",
             description = "Частично обновляет информацию о существующей книге и/или изображение. " +
                     "Все поля опциональны. Можно обновить только поля, только изображение, или и то и другое. " +
-                    "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
-                    "При изменении title проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
+                    "Можно обновить любое поле, включая автора (authorName). " +
+                    "При изменении title или author проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
                     "Изображение должно быть в формате multipart/form-data, размером не более 5MB. " +
                     "Требуется роль ADMIN."
     )

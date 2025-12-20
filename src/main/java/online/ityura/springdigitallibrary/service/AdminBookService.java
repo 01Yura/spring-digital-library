@@ -142,21 +142,39 @@ public class AdminBookService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                         "Book not found with id: " + bookId));
         
-        // Проверка: нельзя изменять автора через PATCH
+        // Определяем автора для проверки уникальности
+        Author author = book.getAuthor();
         if (request.getAuthorName() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                    "Cannot change author: author modification is not allowed");
+            // Находим или создаем автора
+            author = authorRepository.findByFullName(request.getAuthorName())
+                    .orElseGet(() -> {
+                        Author newAuthor = Author.builder()
+                                .fullName(request.getAuthorName())
+                                .build();
+                        return authorRepository.save(newAuthor);
+                    });
+        }
+        
+        // Определяем title для проверки уникальности
+        String titleToCheck = request.getTitle() != null ? request.getTitle() : book.getTitle();
+        
+        // Проверка уникальности если меняется title или author
+        boolean titleChanged = request.getTitle() != null && !request.getTitle().equals(book.getTitle());
+        boolean authorChanged = request.getAuthorName() != null && !author.getId().equals(book.getAuthor().getId());
+        
+        if ((titleChanged || authorChanged) && 
+            bookRepository.existsByTitleAndAuthorId(titleToCheck, author.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                    "Book with this title and author already exists");
         }
         
         // PATCH делает частичное обновление - обновляем только переданные поля
         if (request.getTitle() != null) {
-            // Проверка уникальности если меняется title
-            if (!request.getTitle().equals(book.getTitle()) && 
-                bookRepository.existsByTitleAndAuthorId(request.getTitle(), book.getAuthor().getId())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                        "Book with this title and author already exists");
-            }
             book.setTitle(request.getTitle());
+        }
+        
+        if (request.getAuthorName() != null) {
+            book.setAuthor(author);
         }
         
         if (request.getDescription() != null) {
