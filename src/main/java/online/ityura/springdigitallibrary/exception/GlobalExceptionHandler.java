@@ -162,16 +162,17 @@ public class GlobalExceptionHandler {
                 yield "NOT_FOUND";
             }
             case CONFLICT -> {
-                if (lowerMessage.contains("book") && lowerMessage.contains("already exists")) {
-                    yield "BOOK_ALREADY_EXISTS";
-                } else if (lowerMessage.contains("email") && lowerMessage.contains("already exists")) {
-                    yield "EMAIL_ALREADY_EXISTS";
+                // Проверяем более специфичные случаи первыми
+                if (lowerMessage.contains("review") && lowerMessage.contains("already exists")) {
+                    yield "REVIEW_ALREADY_EXISTS";
                 } else if (lowerMessage.contains("rating") && lowerMessage.contains("already exists")) {
                     yield "RATING_ALREADY_EXISTS";
-                } else if (lowerMessage.contains("review") && lowerMessage.contains("already exists")) {
-                    yield "REVIEW_ALREADY_EXISTS";
+                } else if (lowerMessage.contains("email") && lowerMessage.contains("already exists")) {
+                    yield "EMAIL_ALREADY_EXISTS";
                 } else if (lowerMessage.contains("book") && (lowerMessage.contains("has reviews") || lowerMessage.contains("it has reviews"))) {
                     yield "BOOK_HAS_REVIEWS";
+                } else if (lowerMessage.contains("book") && lowerMessage.contains("already exists")) {
+                    yield "BOOK_ALREADY_EXISTS";
                 }
                 yield "CONFLICT";
             }
