@@ -4,6 +4,7 @@ $ImageName = "01yura/spring-digital-bookstore"
 $ImageTag  = "latest"
 
 Write-Host "Building image $ImageName`:$ImageTag ..."
+cd ../infra
 docker build -t "$ImageName`:$ImageTag" .
 
 Write-Host "Logging in to Docker Hub..."
