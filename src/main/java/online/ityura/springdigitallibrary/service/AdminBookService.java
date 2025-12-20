@@ -106,15 +106,28 @@ public class AdminBookService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                         "Book not found with id: " + bookId));
         
-        // PUT заменяет весь ресурс целиком - проверяем уникальность title
-        if (!request.getTitle().equals(book.getTitle()) && 
-            bookRepository.existsByTitleAndAuthorId(request.getTitle(), book.getAuthor().getId())) {
+        // Находим или создаем автора
+        Author author = authorRepository.findByFullName(request.getAuthorName())
+                .orElseGet(() -> {
+                    Author newAuthor = Author.builder()
+                            .fullName(request.getAuthorName())
+                            .build();
+                    return authorRepository.save(newAuthor);
+                });
+        
+        // Проверяем уникальность title + author (если изменился title или author)
+        boolean titleChanged = !request.getTitle().equals(book.getTitle());
+        boolean authorChanged = !author.getId().equals(book.getAuthor().getId());
+        
+        if ((titleChanged || authorChanged) && 
+            bookRepository.existsByTitleAndAuthorId(request.getTitle(), author.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, 
                     "Book with this title and author already exists");
         }
         
         // Заменяем все поля целиком (полная замена ресурса по REST стандартам)
         book.setTitle(request.getTitle());
+        book.setAuthor(author);
         book.setDescription(request.getDescription());
         book.setPublishedYear(request.getPublishedYear());
         book.setGenre(request.getGenre());

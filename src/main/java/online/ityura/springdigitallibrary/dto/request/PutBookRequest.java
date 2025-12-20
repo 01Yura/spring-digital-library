@@ -2,6 +2,7 @@ package online.ityura.springdigitallibrary.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
@@ -9,22 +10,29 @@ import online.ityura.springdigitallibrary.model.Genre;
 
 @Data
 @Schema(description = "Запрос на полное обновление книги. Все поля обязательны для замены ресурса целиком. " +
-        "Изменение автора (authorName) запрещено и не принимается в этом запросе.")
+        "Если переданы не все поля, возвращается ошибка 400. Автора можно изменить, указав новое имя автора.")
 public class PutBookRequest {
     
     @Schema(description = "Название книги", example = "Updated Spring Boot Guide", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Title is required")
     private String title;
     
-    @Schema(description = "Описание книги", example = "Updated comprehensive guide to Spring Boot framework")
+    @Schema(description = "Имя автора", example = "New Author", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Author name is required")
+    private String authorName;
+    
+    @Schema(description = "Описание книги", example = "Updated comprehensive guide to Spring Boot framework", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Description is required")
     private String description;
     
-    @Schema(description = "Год публикации", example = "2024", minimum = "1000", maximum = "9999")
+    @Schema(description = "Год публикации", example = "2024", minimum = "1000", maximum = "9999", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Published year is required")
     @Min(value = 1000, message = "Published year must be at least 1000")
     @Max(value = 9999, message = "Published year must be at most 9999")
     private Integer publishedYear;
     
-    @Schema(description = "Жанр книги", example = "FICTION")
+    @Schema(description = "Жанр книги", example = "FICTION", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "Genre is required")
     private Genre genre;
 }
 
