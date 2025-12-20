@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import online.ityura.springdigitallibrary.dto.request.CreateBookRequest;
+import online.ityura.springdigitallibrary.dto.request.PutBookRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateBookRequest;
 import online.ityura.springdigitallibrary.dto.response.BookResponse;
 import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
@@ -152,10 +153,12 @@ public class AdminBookController {
     }
 
     @Operation(
-            summary = "Обновить информацию о книге",
-            description = "Обновляет информацию о существующей книге. Все поля опциональны. " +
-                    "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
-                    "При изменении title проверяется уникальность. Требуется роль ADMIN."
+            summary = "Полностью заменить книгу",
+            description = "Полностью заменяет информацию о существующей книге согласно REST стандартам. " +
+                    "Все поля обязательны (кроме authorName, который нельзя изменять). " +
+                    "PUT заменяет весь ресурс целиком, в отличие от PATCH который делает частичное обновление, то есть если вы отправите только одно поле, то на сервере значения не переданных полей станут null. " +
+                    "При изменении title проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
+                    "Требуется роль ADMIN."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -165,20 +168,14 @@ public class AdminBookController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверный формат данных или попытка изменить автора",
+                    description = "Неверный формат данных",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Validation error",
-                                            value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
-                                    ),
-                                    @ExampleObject(
-                                            name = "Author change not allowed",
-                                            value = "{\"status\":400,\"error\":\"AUTHOR_CHANGE_NOT_ALLOWED\",\"message\":\"Cannot change author: author modification is not allowed\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
-                                    )
-                            }
+                            examples = @ExampleObject(
+                                    name = "Validation error",
+                                    value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"title\":\"Title is required\",\"publishedYear\":\"Published year must be between 1000-9999\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/admin/books/1\"}"
+                            )
                     )
             ),
             @ApiResponse(
@@ -213,7 +210,7 @@ public class AdminBookController {
     public ResponseEntity<BookResponse> updateBook(
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId,
-            @Valid @RequestBody UpdateBookRequest request) {
+            @Valid @RequestBody PutBookRequest request) {
         BookResponse response = adminBookService.updateBook(bookId, request);
         return ResponseEntity.ok(response);
     }
@@ -222,7 +219,7 @@ public class AdminBookController {
             summary = "Частично обновить информацию о книге",
             description = "Частично обновляет информацию о существующей книге. Все поля опциональны. " +
                     "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
-                    "При изменении title проверяется уникальность. " +
+                    "При изменении title проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
                     "Для обновления изображения используйте PATCH с multipart/form-data. " +
                     "Требуется роль ADMIN."
     )
@@ -292,7 +289,7 @@ public class AdminBookController {
             description = "Частично обновляет информацию о существующей книге и/или изображение. " +
                     "Все поля опциональны. Можно обновить только поля, только изображение, или и то и другое. " +
                     "Изменение автора (authorName) запрещено и вернет ошибку 400. " +
-                    "При изменении title проверяется уникальность. " +
+                    "При изменении title проверяется уникальность комбинации title + author (у разных авторов могут быть книги с одинаковым названием). " +
                     "Изображение должно быть в формате multipart/form-data, размером не более 5MB. " +
                     "Требуется роль ADMIN."
     )

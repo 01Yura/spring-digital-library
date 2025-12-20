@@ -1,6 +1,7 @@
 package online.ityura.springdigitallibrary.service;
 
 import online.ityura.springdigitallibrary.dto.request.CreateBookRequest;
+import online.ityura.springdigitallibrary.dto.request.PutBookRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateBookRequest;
 import online.ityura.springdigitallibrary.dto.response.AuthorResponse;
 import online.ityura.springdigitallibrary.dto.response.BookResponse;
@@ -100,19 +101,43 @@ public class AdminBookService {
     }
     
     @Transactional
-    public BookResponse updateBook(Long bookId, UpdateBookRequest request) {
+    public BookResponse updateBook(Long bookId, PutBookRequest request) {
         Book book = bookRepository.findByIdWithAuthor(bookId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                         "Book not found with id: " + bookId));
         
-        // Проверка: нельзя изменять автора через PUT
+        // PUT заменяет весь ресурс целиком - проверяем уникальность title
+        if (!request.getTitle().equals(book.getTitle()) && 
+            bookRepository.existsByTitleAndAuthorId(request.getTitle(), book.getAuthor().getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                    "Book with this title and author already exists");
+        }
+        
+        // Заменяем все поля целиком (полная замена ресурса по REST стандартам)
+        book.setTitle(request.getTitle());
+        book.setDescription(request.getDescription());
+        book.setPublishedYear(request.getPublishedYear());
+        book.setGenre(request.getGenre());
+        
+        book = bookRepository.save(book);
+        return mapToBookResponse(book);
+    }
+    
+    @Transactional
+    public BookResponse patchBook(Long bookId, UpdateBookRequest request, MultipartFile imageFile) {
+        Book book = bookRepository.findByIdWithAuthor(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Book not found with id: " + bookId));
+        
+        // Проверка: нельзя изменять автора через PATCH
         if (request.getAuthorName() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
                     "Cannot change author: author modification is not allowed");
         }
         
+        // PATCH делает частичное обновление - обновляем только переданные поля
         if (request.getTitle() != null) {
-            // Проверка уникальности если меняется только title
+            // Проверка уникальности если меняется title
             if (!request.getTitle().equals(book.getTitle()) && 
                 bookRepository.existsByTitleAndAuthorId(request.getTitle(), book.getAuthor().getId())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, 
@@ -132,31 +157,17 @@ public class AdminBookService {
         }
         
         book = bookRepository.save(book);
-        return mapToBookResponse(book);
-    }
-    
-    @Transactional
-    public BookResponse patchBook(Long bookId, UpdateBookRequest request, MultipartFile imageFile) {
-        // Проверка: нельзя изменять автора через PATCH
-        if (request.getAuthorName() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                    "Cannot change author: author modification is not allowed");
-        }
-        
-        // Сначала обновляем поля книги
-        BookResponse response = updateBook(bookId, request);
         
         // Если передан файл изображения, обновляем изображение
         if (imageFile != null && !imageFile.isEmpty()) {
             bookImageService.uploadBookImage(bookId, imageFile);
             // Получаем обновленную книгу для возврата
-            Book book = bookRepository.findByIdWithAuthor(bookId)
+            book = bookRepository.findByIdWithAuthor(bookId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                             "Book not found with id: " + bookId));
-            return mapToBookResponse(book);
         }
         
-        return response;
+        return mapToBookResponse(book);
     }
     
     @Transactional
