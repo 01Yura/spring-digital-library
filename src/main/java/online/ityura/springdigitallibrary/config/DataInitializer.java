@@ -65,6 +65,21 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Admin user already exists.");
         }
 
+        // Проверяем, существует ли уже пользователь crackMyPassword
+        if (!userRepository.existsByEmail("crackMyPassword@gmail.com")) {
+            User crackMyPassword = User.builder()
+                    .nickname("crackMyPassword")
+                    .email("crackMyPassword@gmail.com")
+                    .passwordHash(passwordEncoder.encode("137Password123!@#"))
+                    .role(User.Role.ADMIN)
+                    .build();
+
+            userRepository.save(crackMyPassword);
+            System.out.println("CrackMyPassword user created successfully!");
+        } else {
+            System.out.println("CrackMyPassword user already exists.");
+        }
+
         // Инициализация книг
         initializeBooks();
 
