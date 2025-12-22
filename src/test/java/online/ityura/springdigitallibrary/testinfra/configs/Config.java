@@ -1,4 +1,4 @@
-package online.ityura.springdigitallibrary.configs;
+package online.ityura.springdigitallibrary.testinfra.configs;
 
 import java.io.IOException;
 import java.io.InputStream;
