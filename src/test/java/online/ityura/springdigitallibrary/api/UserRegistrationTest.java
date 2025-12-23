@@ -2,7 +2,10 @@ package online.ityura.springdigitallibrary.api;
 
 import io.restassured.http.ContentType;
 import online.ityura.springdigitallibrary.testinfra.configs.Config;
+import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
@@ -12,9 +15,10 @@ public class UserRegistrationTest extends BaseApiTest {
     @Test
     void userCanLoginWithValidData() {
         given()
+                .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
-                .baseUri(Config.getProperty("apiBaseUrl"))
+                .filters(List.of(new CustomLoggingFilter()))
                 .body("""
                         {
                           "nickname": "TestUser1",
@@ -23,7 +27,7 @@ public class UserRegistrationTest extends BaseApiTest {
                         }
                         """)
                 .when()
-                .post("/api/v1/auth/register")
+                .post("/auth/register")
                 .then()
                 .statusCode(201);
     }
