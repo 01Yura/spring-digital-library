@@ -4,25 +4,29 @@ import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import online.ityura.springdigitallibrary.dto.response.AdminUserResponse;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
-import online.ityura.springdigitallibrary.model.User;
-import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.testinfra.configs.Config;
 import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class UserRegistrationTest extends BaseApiTest {
+public class UserRegistration2Test extends BaseApiTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    private static final String DB_URL = "jdbc:postgresql://localhost:5432/spring_digital_bookstore";
+    private static final String DB_USERNAME = "nobugs228";
+    private static final String DB_PASSWORD = "nobugs228PASSWORD!#";
+
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+    }
 
     @Test
     void userCanLoginWithValidData() {
@@ -82,14 +86,24 @@ public class UserRegistrationTest extends BaseApiTest {
         && user.getEmail().equals("TestUser1@example.com"));
         softly.assertThat(isUserExist).isTrue();
 
-//        Check if user exists in database directly
-        Optional<User> userFromDb = userRepository.findByEmail("TestUser1@example.com");
-        softly.assertThat(userFromDb).isPresent();
-        softly.assertThat(userFromDb.get().getId()).isInstanceOf(Long.class);
-        softly.assertThat(userFromDb.get().getNickname()).isEqualTo("TestUser1");
-        softly.assertThat(userFromDb.get().getEmail()).isEqualTo("TestUser1@example.com");
-        softly.assertThat(userFromDb.get().getPasswordHash()).isNotNull();
-        softly.assertThat(userFromDb.get().getRole()).isEqualTo(User.Role.USER);
+//        Check if user exists in database directly using JDBC
+        try (Connection connection = getConnection()) {
+            String sql = "SELECT id, nickname, email, password_hash, role, created_at FROM users WHERE email = ?";
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, "TestUser1@example.com");
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    softly.assertThat(resultSet.next()).isTrue();
+                    softly.assertThat(resultSet.getLong("id")).isInstanceOf(Long.class);
+                    softly.assertThat(resultSet.getString("nickname")).isEqualTo("TestUser1");
+                    softly.assertThat(resultSet.getString("email")).isEqualTo("TestUser1@example.com");
+                    softly.assertThat(resultSet.getString("password_hash")).isNotNull();
+                    softly.assertThat(resultSet.getString("role")).isEqualTo("USER");
+                    softly.assertThat(resultSet.getTimestamp("created_at")).isNotNull();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to check user in database", e);
+        }
     }
 
 
