@@ -35,9 +35,9 @@ public final class UniversalComparator {
         for (Rule rule : cfg.rules) {
             if (rule.kind == RuleKind.FIELD_TO_FIELD) {
                 Object lVal = readPath(left, rule.leftPath);
-                Object rVal = readPath(right, rule.rightPath);
+                Object rVal = rule.isConstant ? rule.constantValue : readPath(right, rule.rightPath);
 
-                String label = cfg.leftClass + "." + rule.leftPath + " " + rule.op + " " + cfg.rightClass + "." + rule.rightPath
+                String label = cfg.leftClass + "." + rule.leftPath + " " + rule.op + " " + (rule.isConstant ? "\"" + rule.constantValue + "\"" : cfg.rightClass + "." + rule.rightPath)
                         + " | left=" + shortVal(lVal) + ", right=" + shortVal(rVal);
 
                 assertFieldToField(softly, rule.op, lVal, rVal, label);
@@ -61,6 +61,32 @@ public final class UniversalComparator {
                 } else {
                     softly.fail(label + " | Unknown type: " + rule.typeName);
                 }
+            } else if (rule.kind == RuleKind.NOT_NULL_RIGHT) {
+                Object rVal = readPath(right, rule.rightPath);
+
+                String label = cfg.rightClass + "." + rule.rightPath + " @NOT_NULL | value=" + shortVal(rVal);
+                softly.assertThat(rVal).as(label).isNotNull();
+
+            } else if (rule.kind == RuleKind.TYPE_RIGHT) {
+                Object rVal = readPath(right, rule.rightPath);
+
+                String label = cfg.rightClass + "." + rule.rightPath + " @TYPE=" + rule.typeName
+                        + " | value=" + shortVal(rVal);
+
+                Class<?> expected = typeFromName(rule.typeName);
+                softly.assertThat(rVal).as(label).isNotNull();
+                if (expected != null) {
+                    softly.assertThat(rVal).as(label).isInstanceOf(expected);
+                } else {
+                    softly.fail(label + " | Unknown type: " + rule.typeName);
+                }
+            } else if (rule.kind == RuleKind.FIELD_TO_FIELD_RIGHT) {
+                Object rVal = readPath(right, rule.rightPath);
+
+                String label = cfg.rightClass + "." + rule.rightPath + " " + rule.op + " \"" + rule.constantValue + "\""
+                        + " | value=" + shortVal(rVal);
+
+                assertFieldToField(softly, rule.op, rVal, rule.constantValue, label);
             }
         }
 
@@ -145,6 +171,45 @@ public final class UniversalComparator {
             // One-sided checks:
             // leftPath@NOT_NULL
             // leftPath@TYPE=String
+            // @RIGHT:rightPath@NOT_NULL  (check field in right object)
+            // @RIGHT:rightPath@TYPE=String
+            // @RIGHT:rightPath="constant" (compare right field with constant)
+            if (token.startsWith("@RIGHT:")) {
+                String rest = token.substring("@RIGHT:".length()).trim();
+                
+                // Check for @NOT_NULL or @TYPE
+                if (rest.contains("@")) {
+                    String[] a = rest.split("@", 2);
+                    String rightPath = a[0].trim();
+                    String right = a[1].trim();
+
+                    if (right.equalsIgnoreCase("NOT_NULL")) {
+                        rules.add(Rule.notNullRight(rightPath));
+                        continue;
+                    }
+                    if (right.toUpperCase(Locale.ROOT).startsWith("TYPE=")) {
+                        String typeName = right.substring("TYPE=".length()).trim();
+                        rules.add(Rule.typeRight(rightPath, typeName));
+                        continue;
+                    }
+                }
+                
+                // Check for constant comparison: @RIGHT:rightPath="constant"
+                int eq = rest.indexOf('=');
+                if (eq >= 0) {
+                    String rightPath = rest.substring(0, eq).trim();
+                    String rightValue = rest.substring(eq + 1).trim();
+                    
+                    if (rightValue.startsWith("\"") && rightValue.endsWith("\"") && rightValue.length() >= 2) {
+                        Object constantValue = rightValue.substring(1, rightValue.length() - 1);
+                        rules.add(Rule.fieldToFieldRight(rightPath, Op.EQ, constantValue));
+                        continue;
+                    }
+                }
+                
+                throw new IllegalArgumentException("Invalid @RIGHT: rule: " + token);
+            }
+            
             if (token.contains("@")) {
                 String[] a = token.split("@", 2);
                 String leftPath = a[0].trim();
@@ -191,7 +256,15 @@ public final class UniversalComparator {
                 leftPath = leftPart;
             }
 
-            rules.add(Rule.fieldToField(leftPath, rightPath, op));
+            // Check if rightPath is a constant (string in quotes)
+            boolean isConstant = false;
+            Object constantValue = null;
+            if (rightPath.startsWith("\"") && rightPath.endsWith("\"") && rightPath.length() >= 2) {
+                isConstant = true;
+                constantValue = rightPath.substring(1, rightPath.length() - 1);
+            }
+
+            rules.add(Rule.fieldToField(leftPath, rightPath, op, isConstant, constantValue));
         }
 
         return rules;
@@ -354,7 +427,7 @@ public final class UniversalComparator {
 
     // ========================= Model =========================
 
-    private enum RuleKind { FIELD_TO_FIELD, NOT_NULL, TYPE }
+    private enum RuleKind { FIELD_TO_FIELD, NOT_NULL, TYPE, NOT_NULL_RIGHT, TYPE_RIGHT, FIELD_TO_FIELD_RIGHT }
 
     private enum Op {
         EQ, NE, CONTAINS, IN, GT, GE, LT, LE;
@@ -385,24 +458,41 @@ public final class UniversalComparator {
 
         final String typeName;    // only for TYPE
 
-        private Rule(RuleKind kind, String leftPath, String rightPath, Op op, String typeName) {
+        final boolean isConstant; // only for FIELD_TO_FIELD
+        final Object constantValue; // only for FIELD_TO_FIELD when isConstant is true
+
+        private Rule(RuleKind kind, String leftPath, String rightPath, Op op, String typeName, boolean isConstant, Object constantValue) {
             this.kind = kind;
             this.leftPath = leftPath;
             this.rightPath = rightPath;
             this.op = op;
             this.typeName = typeName;
+            this.isConstant = isConstant;
+            this.constantValue = constantValue;
         }
 
-        static Rule fieldToField(String leftPath, String rightPath, Op op) {
-            return new Rule(RuleKind.FIELD_TO_FIELD, leftPath, rightPath, op, null);
+        static Rule fieldToField(String leftPath, String rightPath, Op op, boolean isConstant, Object constantValue) {
+            return new Rule(RuleKind.FIELD_TO_FIELD, leftPath, rightPath, op, null, isConstant, constantValue);
         }
 
         static Rule notNull(String leftPath) {
-            return new Rule(RuleKind.NOT_NULL, leftPath, null, null, null);
+            return new Rule(RuleKind.NOT_NULL, leftPath, null, null, null, false, null);
         }
 
         static Rule type(String leftPath, String typeName) {
-            return new Rule(RuleKind.TYPE, leftPath, null, null, typeName);
+            return new Rule(RuleKind.TYPE, leftPath, null, null, typeName, false, null);
+        }
+
+        static Rule notNullRight(String rightPath) {
+            return new Rule(RuleKind.NOT_NULL_RIGHT, null, rightPath, null, null, false, null);
+        }
+
+        static Rule typeRight(String rightPath, String typeName) {
+            return new Rule(RuleKind.TYPE_RIGHT, null, rightPath, null, typeName, false, null);
+        }
+
+        static Rule fieldToFieldRight(String rightPath, Op op, Object constantValue) {
+            return new Rule(RuleKind.FIELD_TO_FIELD_RIGHT, null, rightPath, op, null, true, constantValue);
         }
     }
 
