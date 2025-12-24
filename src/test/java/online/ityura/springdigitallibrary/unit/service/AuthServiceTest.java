@@ -98,10 +98,11 @@ class AuthServiceTest {
         when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
         
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, 
                 () -> authService.register(registerRequest));
         
-        assertEquals("Email already exists", exception.getMessage());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Email already exists", exception.getReason());
         verify(userRepository, never()).save(any(User.class));
     }
     
