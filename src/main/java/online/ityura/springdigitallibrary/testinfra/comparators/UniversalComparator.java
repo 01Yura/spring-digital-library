@@ -273,26 +273,30 @@ public final class UniversalComparator {
     // ========================= Assertions =========================
 
     private static void assertFieldToField(SoftAssertions softly, Op op, Object left, Object right, String label) {
+        // Normalize values for comparison: if one is enum and other is string, convert enum to string
+        Object normalizedLeft = normalizeForComparison(left, right);
+        Object normalizedRight = normalizeForComparison(right, left);
+        
         switch (op) {
             case EQ -> {
-                softly.assertThat(left).as(label).isEqualTo(right);
+                softly.assertThat(normalizedLeft).as(label).isEqualTo(normalizedRight);
             }
             case NE -> {
-                softly.assertThat(left).as(label).isNotEqualTo(right);
+                softly.assertThat(normalizedLeft).as(label).isNotEqualTo(normalizedRight);
             }
             case CONTAINS -> {
-                String l = str(left);
-                String r = str(right);
+                String l = str(normalizedLeft);
+                String r = str(normalizedRight);
                 softly.assertThat(l).as(label).contains(r);
             }
             case IN -> {
-                String l = str(left);
-                String r = str(right);
+                String l = str(normalizedLeft);
+                String r = str(normalizedRight);
                 softly.assertThat(r).as(label).contains(l);
             }
             case GT, GE, LT, LE -> {
-                BigDecimal l = toBigDecimal(left);
-                BigDecimal r = toBigDecimal(right);
+                BigDecimal l = toBigDecimal(normalizedLeft);
+                BigDecimal r = toBigDecimal(normalizedRight);
                 softly.assertThat(l).as(label + " | left is not numeric").isNotNull();
                 softly.assertThat(r).as(label + " | right is not numeric").isNotNull();
                 if (l == null || r == null) return;
@@ -379,6 +383,23 @@ public final class UniversalComparator {
     }
 
     // ========================= Helpers =========================
+
+    /**
+     * Нормализует значение для сравнения: если один объект - enum, а другой - строка,
+     * преобразует enum в строку через .name() для корректного сравнения.
+     */
+    private static Object normalizeForComparison(Object value, Object other) {
+        if (value == null) return null;
+        
+        // Если value - enum, а other - строка, преобразуем enum в строку
+        if (value.getClass().isEnum() && other instanceof String) {
+            return ((Enum<?>) value).name();
+        }
+        
+        // Если value - строка, а other - enum, оставляем строку как есть
+        // (enum будет преобразован в отдельном вызове normalizeForComparison(other, value))
+        return value;
+    }
 
     private static String str(Object o) {
         return o == null ? "null" : String.valueOf(o);
