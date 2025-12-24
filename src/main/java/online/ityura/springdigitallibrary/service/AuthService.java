@@ -5,6 +5,7 @@ import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.security.JwtTokenProvider;
@@ -44,7 +45,7 @@ public class AuthService {
                 .nickname(request.getNickname())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
         
         user = userRepository.save(user);

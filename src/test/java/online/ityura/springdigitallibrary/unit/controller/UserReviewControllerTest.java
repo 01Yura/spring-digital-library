@@ -2,6 +2,7 @@ package online.ityura.springdigitallibrary.unit.controller;
 
 import online.ityura.springdigitallibrary.controller.UserReviewController;
 import online.ityura.springdigitallibrary.dto.response.ReviewResponse;
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.service.ReviewService;
@@ -56,7 +57,7 @@ class UserReviewControllerTest {
                 .email("test@example.com")
                 .nickname("testuser")
                 .passwordHash("encodedPassword")
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
         
         reviewResponse = ReviewResponse.builder()

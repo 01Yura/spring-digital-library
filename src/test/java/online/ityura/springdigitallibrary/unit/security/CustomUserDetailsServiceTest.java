@@ -1,5 +1,6 @@
 package online.ityura.springdigitallibrary.unit.security;
 
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.security.CustomUserDetailsService;
@@ -35,7 +36,7 @@ class CustomUserDetailsServiceTest {
                 .email("test@example.com")
                 .nickname("testuser")
                 .passwordHash("encodedPassword")
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
     }
     
@@ -58,7 +59,7 @@ class CustomUserDetailsServiceTest {
     @Test
     void testLoadUserByUsername_AdminRole_ShouldReturnAdminUserDetails() {
         // Given
-        testUser.setRole(User.Role.ADMIN);
+        testUser.setRole(Role.ADMIN);
         when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(testUser));
         
         // When

@@ -56,7 +56,7 @@ public class DataInitializer implements CommandLineRunner {
                     .nickname("admin")
                     .email("admin@gmail.com")
                     .passwordHash(passwordEncoder.encode("admin"))
-                    .role(User.Role.ADMIN)
+                    .role(Role.ADMIN)
                     .build();
 
             userRepository.save(admin);
@@ -71,7 +71,7 @@ public class DataInitializer implements CommandLineRunner {
                     .nickname("crackMyPassword")
                     .email("crackMyPassword@gmail.com")
                     .passwordHash(passwordEncoder.encode("137Password123!@#"))
-                    .role(User.Role.ADMIN)
+                    .role(Role.ADMIN)
                     .build();
 
             userRepository.save(crackMyPassword);
@@ -770,7 +770,7 @@ public class DataInitializer implements CommandLineRunner {
                             .nickname(nickname)
                             .email(email)
                             .passwordHash(passwordEncoder.encode("password123"))
-                            .role(User.Role.USER)
+                            .role(Role.USER)
                             .build();
                     return userRepository.save(user);
                 });

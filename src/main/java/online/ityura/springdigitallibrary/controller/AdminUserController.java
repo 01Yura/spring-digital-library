@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import online.ityura.springdigitallibrary.dto.response.AdminUserResponse;
 import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -147,7 +148,7 @@ public class AdminUserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "User not found with id: " + userId));
         
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == Role.ADMIN) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Cannot delete user with ADMIN role");
         }

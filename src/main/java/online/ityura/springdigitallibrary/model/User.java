@@ -42,9 +42,5 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-    
-    public enum Role {
-        USER, ADMIN
-    }
 }
 

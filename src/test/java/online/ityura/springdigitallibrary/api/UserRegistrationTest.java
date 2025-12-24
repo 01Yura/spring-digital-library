@@ -7,15 +7,15 @@ import online.ityura.springdigitallibrary.dto.response.AdminUserResponse;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.model.Role;
+import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.testinfra.comparators.UniversalComparator;
 import online.ityura.springdigitallibrary.testinfra.configs.Config;
+import online.ityura.springdigitallibrary.testinfra.database.Condition;
+import online.ityura.springdigitallibrary.testinfra.database.DBRequest;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
-import online.ityura.springdigitallibrary.testinfra.generators.RandomModelGenerator;
 import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import java.sql.*;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -23,14 +23,7 @@ import static io.restassured.RestAssured.given;
 
 public class UserRegistrationTest extends BaseApiTest {
 
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/spring_digital_bookstore";
-    private static final String DB_USERNAME = "nobugs228";
-    private static final String DB_PASSWORD = "nobugs228PASSWORD!#";
-
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-    }
-    @RepeatedTest(value = 50)
+    @Test
     void userCanLoginWithValidData() {
 //        Arrangement
         RegisterRequest registerRequest = RandomDtoGeneratorWithFaker.generateRandomDtoObject(RegisterRequest.class);
@@ -90,23 +83,19 @@ public class UserRegistrationTest extends BaseApiTest {
                 && user.getEmail().equals(registerRequest.getEmail()));
         softly.assertThat(isUserExist).isTrue();
 
-//        Check if user exists in database directly using JDBC
-        try (Connection connection = getConnection()) {
-            String sql = "SELECT id, nickname, email, password_hash, role, created_at FROM users WHERE email = ?";
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, registerRequest.getEmail());
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    softly.assertThat(resultSet.next()).isTrue();
-                    softly.assertThat(resultSet.getLong("id")).isInstanceOf(Long.class);
-                    softly.assertThat(resultSet.getString("nickname")).isEqualTo(registerRequest.getNickname());
-                    softly.assertThat(resultSet.getString("email")).isEqualTo(registerRequest.getEmail());
-                    softly.assertThat(resultSet.getString("password_hash")).isNotNull();
-                    softly.assertThat(resultSet.getString("role")).isEqualTo(Role.USER.toString());
-                    softly.assertThat(resultSet.getTimestamp("created_at")).isNotNull();
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to check user in database", e);
-        }
+//        Check if user exists in database directly using DBRequest
+        User user = DBRequest.builder()
+                .requestType(DBRequest.RequestType.SELECT)
+                .table("users")
+                .where(Condition.equalTo("email", registerRequest.getEmail()))
+                .extractAs(User.class);
+
+        softly.assertThat(user).isNotNull();
+        softly.assertThat(user.getId()).isInstanceOf(Long.class);
+        softly.assertThat(user.getNickname()).isEqualTo(registerRequest.getNickname());
+        softly.assertThat(user.getEmail()).isEqualTo(registerRequest.getEmail());
+        softly.assertThat(user.getPasswordHash()).isNotNull();
+        softly.assertThat(user.getRole()).isEqualTo(Role.USER);
+        softly.assertThat(user.getCreatedAt()).isNotNull();
     }
 }

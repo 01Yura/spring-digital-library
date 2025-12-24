@@ -4,6 +4,7 @@ import online.ityura.springdigitallibrary.controller.ReviewController;
 import online.ityura.springdigitallibrary.dto.request.CreateReviewRequest;
 import online.ityura.springdigitallibrary.dto.request.UpdateReviewRequest;
 import online.ityura.springdigitallibrary.dto.response.ReviewResponse;
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.UserRepository;
 import online.ityura.springdigitallibrary.service.ReviewService;
@@ -60,7 +61,7 @@ class ReviewControllerTest {
                 .email("test@example.com")
                 .nickname("testuser")
                 .passwordHash("encodedPassword")
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
         
         createRequest = new CreateReviewRequest();

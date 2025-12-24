@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import online.ityura.springdigitallibrary.model.User.Role;
+import online.ityura.springdigitallibrary.model.Role;
 
 import java.time.LocalDateTime;
 

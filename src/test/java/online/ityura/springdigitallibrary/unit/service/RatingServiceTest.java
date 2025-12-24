@@ -6,6 +6,7 @@ import online.ityura.springdigitallibrary.dto.response.RatingResponse;
 import online.ityura.springdigitallibrary.model.Author;
 import online.ityura.springdigitallibrary.model.Book;
 import online.ityura.springdigitallibrary.model.Rating;
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.repository.BookRepository;
 import online.ityura.springdigitallibrary.repository.RatingRepository;
@@ -70,7 +71,7 @@ class RatingServiceTest {
                 .nickname("testuser")
                 .email("test@example.com")
                 .passwordHash("encodedPassword")
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
         
         testRating = Rating.builder()
