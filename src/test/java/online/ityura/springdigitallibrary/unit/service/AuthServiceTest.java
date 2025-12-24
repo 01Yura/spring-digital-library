@@ -86,7 +86,7 @@ class AuthServiceTest {
         assertNotNull(response);
         assertEquals(testUser.getId(), response.getUserId());
         assertEquals(testUser.getEmail(), response.getEmail());
-        assertEquals("USER", response.getRole());
+        assertEquals(Role.USER, response.getRole());
         
         verify(userRepository).existsByEmail(registerRequest.getEmail());
         verify(passwordEncoder).encode(registerRequest.getPassword());

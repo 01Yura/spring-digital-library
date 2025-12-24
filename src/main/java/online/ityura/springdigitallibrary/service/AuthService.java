@@ -53,7 +53,7 @@ public class AuthService {
         return RegisterResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
-                .role(user.getRole().name())
+                .role(user.getRole())
                 .build();
     }
     

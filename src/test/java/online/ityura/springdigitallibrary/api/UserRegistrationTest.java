@@ -6,7 +6,6 @@ import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.AdminUserResponse;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
-import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.testinfra.comparators.UniversalComparator;
 import online.ityura.springdigitallibrary.testinfra.configs.Config;
@@ -25,10 +24,10 @@ public class UserRegistrationTest extends BaseApiTest {
 
     @Test
     void userCanLoginWithValidData() {
-//        Arrangement
+//        Create DTO object for request
         RegisterRequest registerRequest = RandomDtoGeneratorWithFaker.generateRandomDtoObject(RegisterRequest.class);
 
-//        Create user
+//        Register user ans save response
         RegisterResponse registerResponse = given()
                 .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
                 .contentType(ContentType.JSON)
@@ -41,10 +40,10 @@ public class UserRegistrationTest extends BaseApiTest {
                 .statusCode(201)
                 .extract().as(RegisterResponse.class);
 
-        // Проверка соответствия полей между request и response
+        // Check that response meet the request and valid
         UniversalComparator.match(registerRequest, registerResponse);
 
-//        Login as admin
+//        Login as admin and save access token
         LoginResponse loginResponse = given()
                 .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
                 .contentType(ContentType.JSON)
@@ -64,7 +63,7 @@ public class UserRegistrationTest extends BaseApiTest {
 
         String accessToken = loginResponse.getAccessToken();
 
-//        Check if user exists thru admin request
+//        Check if user exists on backend thru admin request
         List<AdminUserResponse> users = given()
                 .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
                 .contentType(ContentType.JSON)
@@ -83,7 +82,7 @@ public class UserRegistrationTest extends BaseApiTest {
                 && user.getEmail().equals(registerRequest.getEmail()));
         softly.assertThat(isUserExist).isTrue();
 
-//        Check if user exists in database directly using DBRequest
+//        Check if the user exists in the database directly
         User user = DBRequest.builder()
                 .requestType(DBRequest.RequestType.SELECT)
                 .table("users")
@@ -95,7 +94,7 @@ public class UserRegistrationTest extends BaseApiTest {
         softly.assertThat(user.getNickname()).isEqualTo(registerRequest.getNickname());
         softly.assertThat(user.getEmail()).isEqualTo(registerRequest.getEmail());
         softly.assertThat(user.getPasswordHash()).isNotNull();
-        softly.assertThat(user.getRole()).isEqualTo(Role.USER);
+        softly.assertThat(user.getRole()).isEqualTo(registerResponse.getRole());
         softly.assertThat(user.getCreatedAt()).isNotNull();
     }
 }

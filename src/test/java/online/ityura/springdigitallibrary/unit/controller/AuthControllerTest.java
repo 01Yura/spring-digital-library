@@ -7,6 +7,7 @@ import online.ityura.springdigitallibrary.dto.request.RefreshTokenRequest;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
+import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +55,7 @@ class AuthControllerTest {
         RegisterResponse response = RegisterResponse.builder()
                 .userId(1L)
                 .email("test@example.com")
-                .role("USER")
+                .role(Role.USER)
                 .build();
         
         when(authService.register(any(RegisterRequest.class))).thenReturn(response);
@@ -129,7 +130,7 @@ class AuthControllerTest {
         RegisterResponse response = RegisterResponse.builder()
                 .userId(1L)
                 .email("test@example.com")
-                .role("USER")
+                .role(Role.USER)
                 .build();
         
         when(authService.register(any(RegisterRequest.class))).thenReturn(response);
@@ -143,6 +144,6 @@ class AuthControllerTest {
         assertNotNull(result.getBody());
         assertEquals(1L, result.getBody().getUserId());
         assertEquals("test@example.com", result.getBody().getEmail());
-        assertEquals("USER", result.getBody().getRole());
+        assertEquals(Role.USER, result.getBody().getRole());
     }
 }

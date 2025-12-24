@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.model.Role;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +21,6 @@ public class RegisterResponse {
     private String email;
     
     @Schema(description = "Роль пользователя", example = "USER")
-    private String role;
+    private Role role;
 }
 
