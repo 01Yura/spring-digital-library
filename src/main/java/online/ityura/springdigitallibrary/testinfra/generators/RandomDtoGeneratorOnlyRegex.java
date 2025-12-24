@@ -13,7 +13,7 @@ import java.util.Random;
  * Поддерживает генерацию значений на основе аннотации @RegexGen,
  * автоматический выбор значений из Enum и рекурсивную генерацию вложенных объектов.
  */
-public class RandomDtoGenerator {
+public class RandomDtoGeneratorOnlyRegex {
     
     private static final Random random = new Random();
     

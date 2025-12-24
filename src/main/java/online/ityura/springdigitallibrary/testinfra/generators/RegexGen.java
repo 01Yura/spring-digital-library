@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Аннотация для указания регулярного выражения для генерации случайных значений полей.
- * Используется в сочетании с RandomDtoGenerator для автоматической генерации тестовых данных.
+ * Используется в сочетании с RandomDtoGeneratorOnlyRegex для автоматической генерации тестовых данных.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

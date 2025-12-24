@@ -1,10 +1,8 @@
-package online.ityura.springdigitallibrary.testinfra.helper;
+package online.ityura.springdigitallibrary.testinfra.helpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import io.restassured.filter.Filter;
 import io.restassured.filter.FilterContext;
 import io.restassured.http.Headers;

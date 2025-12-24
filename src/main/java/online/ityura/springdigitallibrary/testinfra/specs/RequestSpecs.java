@@ -6,7 +6,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import online.ityura.springdigitallibrary.dto.request.LoginRequest;
 import online.ityura.springdigitallibrary.testinfra.configs.Config;
-import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
+import online.ityura.springdigitallibrary.testinfra.helpers.CustomLoggingFilter;
 
 import java.util.HashMap;
 import java.util.Map;

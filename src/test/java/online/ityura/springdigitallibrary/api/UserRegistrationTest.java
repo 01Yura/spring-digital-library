@@ -1,18 +1,14 @@
 package online.ityura.springdigitallibrary.api;
 
 import io.restassured.common.mapper.TypeRef;
-import io.restassured.http.ContentType;
 import online.ityura.springdigitallibrary.dto.request.RegisterRequest;
 import online.ityura.springdigitallibrary.dto.response.AdminUserResponse;
-import online.ityura.springdigitallibrary.dto.response.LoginResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.testinfra.comparators.UniversalComparator;
-import online.ityura.springdigitallibrary.testinfra.configs.Config;
 import online.ityura.springdigitallibrary.testinfra.database.Condition;
 import online.ityura.springdigitallibrary.testinfra.database.DBRequest;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
-import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
 import online.ityura.springdigitallibrary.testinfra.specs.RequestSpecs;
 import org.junit.jupiter.api.Test;
 
