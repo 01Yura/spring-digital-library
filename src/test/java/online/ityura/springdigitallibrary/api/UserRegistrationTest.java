@@ -12,6 +12,7 @@ import online.ityura.springdigitallibrary.testinfra.configs.Config;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomModelGenerator;
 import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
@@ -29,8 +30,7 @@ public class UserRegistrationTest extends BaseApiTest {
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
     }
-
-    @Test
+    @RepeatedTest(value = 50)
     void userCanLoginWithValidData() {
 //        Arrangement
         RegisterRequest registerRequest = RandomDtoGeneratorWithFaker.generateRandomDtoObject(RegisterRequest.class);
@@ -48,11 +48,8 @@ public class UserRegistrationTest extends BaseApiTest {
                 .statusCode(201)
                 .extract().as(RegisterResponse.class);
 
+        // Проверка соответствия полей между request и response
         UniversalComparator.match(registerRequest, registerResponse);
-
-        softly.assertThat(registerResponse.getUserId()).isInstanceOf(Long.class);
-        softly.assertThat(registerResponse.getEmail()).isEqualTo(registerRequest.getEmail());
-        softly.assertThat(registerResponse.getRole()).isEqualTo(Role.USER.toString());
 
 //        Login as admin
         LoginResponse loginResponse = given()

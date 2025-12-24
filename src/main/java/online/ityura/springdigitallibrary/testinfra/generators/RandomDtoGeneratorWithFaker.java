@@ -171,7 +171,7 @@ public final class RandomDtoGeneratorWithFaker {
 
         // PASSWORD
         if (containsAny(n, "password", "pass", "pwd")) {
-            return generatePassword(12, 16);
+            return generatePassword(8, 16);
         }
 
         // phone
@@ -291,21 +291,36 @@ public final class RandomDtoGeneratorWithFaker {
         return base;
     }
 
-    /** Strong password: upper + lower + digit + special, no spaces, len 12..16 by default */
+    /** 
+     * Strong password matching validation: 
+     * - at least one digit, one lower case, one upper case, one special character (!@#$%^&+=)
+     * - no spaces
+     * - minimum 8 characters
+     */
     private static String generatePassword(int minLen, int maxLen) {
-        int len = ThreadLocalRandom.current().nextInt(minLen, maxLen + 1);
+        // Ensure minimum length is at least 8
+        int actualMinLen = Math.max(minLen, 8);
+        int len = ThreadLocalRandom.current().nextInt(actualMinLen, maxLen + 1);
 
+        // Required characters according to validation: !@#$%^&+=
+        String specialChars = "!@#$%^&+=";
+        
         char upper = randomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         char lower = randomChar("abcdefghijklmnopqrstuvwxyz");
         char digit = randomChar("0123456789");
-        char spec = randomChar("!@#$%^&*()-_=+[]{}.,?");
+        char spec = randomChar(specialChars);
 
+        // Start with required characters
         StringBuilder sb = new StringBuilder(len);
         sb.append(upper).append(lower).append(digit).append(spec);
 
-        String all = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}.,?";
-        while (sb.length() < len) sb.append(randomChar(all));
+        // Fill the rest with any allowed characters (no spaces)
+        String allChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" + specialChars;
+        while (sb.length() < len) {
+            sb.append(randomChar(allChars));
+        }
 
+        // Shuffle to avoid predictable pattern
         List<Character> chars = new ArrayList<>(sb.length());
         for (int i = 0; i < sb.length(); i++) chars.add(sb.charAt(i));
         Collections.shuffle(chars, ThreadLocalRandom.current());
@@ -313,7 +328,7 @@ public final class RandomDtoGeneratorWithFaker {
         StringBuilder out = new StringBuilder(len);
         for (char c : chars) out.append(c);
 
-        return out.toString().replace(" ", "");
+        return out.toString();
     }
 
     /** Simple stable ISBN-13 pattern (not checksum-valid, but looks real) */
