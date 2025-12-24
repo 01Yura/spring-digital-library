@@ -13,11 +13,13 @@ import online.ityura.springdigitallibrary.testinfra.database.Condition;
 import online.ityura.springdigitallibrary.testinfra.database.DBRequest;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
 import online.ityura.springdigitallibrary.testinfra.helper.CustomLoggingFilter;
+import online.ityura.springdigitallibrary.testinfra.specs.RequestSpecs;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 
 public class UserRegistrationTest extends BaseApiTest {
@@ -29,51 +31,28 @@ public class UserRegistrationTest extends BaseApiTest {
 
 //        Register user ans save response
         RegisterResponse registerResponse = given()
-                .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .filter(new CustomLoggingFilter())
+                .spec(RequestSpecs.unauthSpec())
                 .body(registerRequest)
                 .when()
                 .post("/auth/register")
                 .then()
                 .statusCode(201)
+                .body(matchesJsonSchemaInClasspath(
+                        "contracts/api/v1/auth/register/post-response.schema.json"
+                ))
                 .extract().as(RegisterResponse.class);
 
         // Check that response meet the request and valid
         UniversalComparator.match(registerRequest, registerResponse);
 
-//        Login as admin and save access token
-        LoginResponse loginResponse = given()
-                .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .filter(new CustomLoggingFilter())
-                .body("""
-                        {
-                          "email": "admin@gmail.com",
-                          "password": "admin"
-                        }
-                        """)
-                .when()
-                .post("/auth/login")
-                .then()
-                .statusCode(200)
-                .extract().as(LoginResponse.class);
-
-        String accessToken = loginResponse.getAccessToken();
-
 //        Check if user exists on backend thru admin request
         List<AdminUserResponse> users = given()
-                .baseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"))
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .header("Authorization", "Bearer " + accessToken)
-                .filter(new CustomLoggingFilter())
+                .spec(RequestSpecs.adminSpec())
                 .when()
                 .get("/admin/users")
                 .then()
                 .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("contracts/api/v1/admin/users/get-response.schema.json"))
                 .extract()
                 .as(new TypeRef<List<AdminUserResponse>>() {
                 });
