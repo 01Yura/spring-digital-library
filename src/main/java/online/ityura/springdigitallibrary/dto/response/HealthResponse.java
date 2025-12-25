@@ -5,13 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Schema(description = "Ответ о состоянии приложения")
-public class HealthResponse {
+public class HealthResponse extends BaseDto {
     
     @Schema(description = "Статус работы приложения", example = "UP")
     private String status;

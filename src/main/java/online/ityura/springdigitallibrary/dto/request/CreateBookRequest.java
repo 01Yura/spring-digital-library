@@ -5,11 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.model.Genre;
 
 @Data
 @Schema(description = "Запрос на создание новой книги")
-public class CreateBookRequest {
+public class CreateBookRequest extends BaseDto {
     
     @Schema(description = "Название книги", example = "Spring Boot Guide", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Title is required")

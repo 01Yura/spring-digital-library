@@ -6,11 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.testinfra.generators.RegexGen;
 
 @Data
 @Schema(description = "Запрос на регистрацию нового пользователя")
-public class RegisterRequest {
+public class RegisterRequest extends BaseDto {
     
     @Schema(description = "Никнейм пользователя", example = "john_doe", requiredMode = Schema.RequiredMode.REQUIRED, minLength = 3, maxLength = 50)
     @NotBlank(message = "Nickname is required")

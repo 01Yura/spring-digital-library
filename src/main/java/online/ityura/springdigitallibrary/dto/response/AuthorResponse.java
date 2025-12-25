@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthorResponse {
+public class AuthorResponse extends BaseDto {
     private Long id;
     private String fullName;
 }

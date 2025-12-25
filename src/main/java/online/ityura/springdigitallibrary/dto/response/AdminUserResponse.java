@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.model.Role;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AdminUserResponse {
+public class AdminUserResponse extends BaseDto {
     private Long id;
     private String nickname;
     private String email;

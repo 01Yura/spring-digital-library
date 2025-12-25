@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.model.Role;
 
 @Data
@@ -12,7 +13,7 @@ import online.ityura.springdigitallibrary.model.Role;
 @AllArgsConstructor
 @Builder
 @Schema(description = "Ответ на регистрацию нового пользователя")
-public class RegisterResponse {
+public class RegisterResponse extends BaseDto {
     
     @Schema(description = "ID пользователя", example = "1")
     private Long userId;

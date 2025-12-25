@@ -5,13 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Schema(description = "Информация о Kubernetes окружении")
-public class KuberInfoResponse {
+public class KuberInfoResponse extends BaseDto {
     
     @Schema(description = "Имя пода", example = "spring-students-app-7d8f9c4b5-abc12")
     private String podName;

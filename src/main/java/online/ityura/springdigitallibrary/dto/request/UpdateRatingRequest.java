@@ -5,10 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
 @Schema(description = "Запрос на обновление рейтинга")
-public class UpdateRatingRequest {
+public class UpdateRatingRequest extends BaseDto {
     
     @Schema(description = "Новое значение рейтинга (от 1 до 10)", example = "9", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1", maximum = "10")
     @NotNull(message = "Rating value is required")

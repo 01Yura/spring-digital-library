@@ -5,13 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Schema(description = "Ответ на вход в систему")
-public class LoginResponse {
+public class LoginResponse extends BaseDto {
     
     @Schema(description = "Access токен для аутентификации", example = "eyJhbGciOiJIUzI1NiJ9...")
     private String accessToken;

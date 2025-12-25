@@ -2,7 +2,8 @@ package online.ityura.springdigitallibrary.testinfra.specs;
 
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.ResponseSpecification;
-import org.hamcrest.Matchers;
+
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 public class ResponseSpecs {
     private ResponseSpecs() {
@@ -12,22 +13,16 @@ public class ResponseSpecs {
         return new ResponseSpecBuilder();
     }
 
-    public static ResponseSpecification responseReturns200Spec() {
+    public static ResponseSpecification statusCode(int code) {
         return defaultResponseSpecBuilder()
-                .expectStatusCode(200)
+                .expectStatusCode(code)
                 .build();
     }
 
-    public static ResponseSpecification responseReturns201Spec() {
+    public static ResponseSpecification statusCodeAndSchema(int code, String schemaClasspath) {
         return defaultResponseSpecBuilder()
-                .expectStatusCode(201)
-                .build();
-    }
-
-
-    public static ResponseSpecification responseReturns400Spec() {
-        return defaultResponseSpecBuilder()
-                .expectStatusCode(400)
+                .expectStatusCode(code)
+                .expectBody(matchesJsonSchemaInClasspath(schemaClasspath))
                 .build();
     }
 }

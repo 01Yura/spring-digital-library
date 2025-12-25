@@ -5,13 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Schema(description = "Ответ с сообщением")
-public class MessageResponse {
+public class MessageResponse extends BaseDto {
     
     @Schema(description = "Сообщение")
     private String message;

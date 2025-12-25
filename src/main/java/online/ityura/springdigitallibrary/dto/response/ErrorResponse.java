@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.ityura.springdigitallibrary.dto.BaseDto;
 
 import java.time.Instant;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Map;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Стандартизированный ответ об ошибке")
-public class ErrorResponse {
+public class ErrorResponse extends BaseDto {
     
     @Schema(description = "HTTP статус код", example = "400")
     private Integer status;

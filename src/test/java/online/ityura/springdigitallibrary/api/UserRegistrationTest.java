@@ -9,13 +9,13 @@ import online.ityura.springdigitallibrary.testinfra.comparators.UniversalCompara
 import online.ityura.springdigitallibrary.testinfra.database.Condition;
 import online.ityura.springdigitallibrary.testinfra.database.DBRequest;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
+import online.ityura.springdigitallibrary.testinfra.requests.clients.CrudRequester;
+import online.ityura.springdigitallibrary.testinfra.requests.clients.Endpoint;
 import online.ityura.springdigitallibrary.testinfra.specs.RequestSpecs;
+import online.ityura.springdigitallibrary.testinfra.specs.ResponseSpecs;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 
 public class UserRegistrationTest extends BaseApiTest {
@@ -25,33 +25,23 @@ public class UserRegistrationTest extends BaseApiTest {
 //        Create DTO object for request
         RegisterRequest registerRequest = RandomDtoGeneratorWithFaker.generateRandomDtoObject(RegisterRequest.class);
 
-//        Register user ans save response
-        RegisterResponse registerResponse = given()
-                .spec(RequestSpecs.unauthSpec())
-                .body(registerRequest)
-                .when()
-                .post("/auth/register")
-                .then()
-                .statusCode(201)
-                .body(matchesJsonSchemaInClasspath(
-                        "contracts/api/v1/auth/register/post-response.schema.json"
-                ))
-                .extract().as(RegisterResponse.class);
+//        Register user and save response
+        RegisterResponse registerResponse =
+                new CrudRequester(RequestSpecs.unauthSpec(),
+                        ResponseSpecs.statusCode(201), Endpoint.AUTH_REGISTER)
+                        .post(registerRequest)
+                        .extract().as(RegisterResponse.class);
 
-        // Check that response meet the request and valid
+        // Check that the response meets the request and valid
         UniversalComparator.match(registerRequest, registerResponse);
 
 //        Check if user exists on backend thru admin request
-        List<AdminUserResponse> users = given()
-                .spec(RequestSpecs.adminSpec())
-                .when()
-                .get("/admin/users")
-                .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath("contracts/api/v1/admin/users/get-response.schema.json"))
-                .extract()
-                .as(new TypeRef<List<AdminUserResponse>>() {
-                });
+        List<AdminUserResponse> users =
+                new CrudRequester(RequestSpecs.adminSpec(), ResponseSpecs.statusCode(200), Endpoint.ADMIN_USERS)
+                        .get()
+                        .extract()
+                        .as(new TypeRef<List<AdminUserResponse>>() {
+                        });
 
         Boolean isUserExist = users.stream().anyMatch(user -> user.getNickname().equals(registerRequest.getNickname())
                 && user.getEmail().equals(registerRequest.getEmail()));
