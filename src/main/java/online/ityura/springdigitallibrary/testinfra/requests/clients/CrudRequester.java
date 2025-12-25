@@ -3,7 +3,6 @@ package online.ityura.springdigitallibrary.testinfra.requests.clients;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import lombok.AllArgsConstructor;
 import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.testinfra.requests.interfaces.CrudEndpointInterface;
 
@@ -26,40 +25,17 @@ public class CrudRequester extends HttpClient implements CrudEndpointInterface {
     public CrudRequester(RequestSpecification requestSpecification, ResponseSpecification responseSpecification, Endpoint endpoint) {
         super(requestSpecification, responseSpecification, endpoint);
     }
-
+//    Вариан реализации когда тело может быть пустое
 //    @Override
-//    public ValidatableResponse get() {
-//        return given()
-//                .spec(requestSpecification)
-//                .when()
-//                .get(API_VERSION + endpoint.getUrl())
-//                .then()
-//                .spec(responseSpecification);
-//    }
-//
-//
-//    @Override
-//    public ValidatableResponse put(BaseModel model) {
-//        return given()
-//                .spec(requestSpecification)
-//                .body(model)
-//                .when()
-//                .put(API_VERSION + endpoint.getUrl())
-//                .then()
-//                .spec(responseSpecification);
-//    }
-
-
-//    @Override
-//    public ValidatableResponse post(BaseModel model) {
+//    public ValidatableResponse post(BaseDto dto) {
 //            var request = given()
 //                    .spec(requestSpecification);
 //
-//            if (model != null) request.body(model);
+//            if (dto != null) request.body(dto);
 //
 //            return request
 //                    .when()
-//                    .post(API_VERSION + endpoint.getRelativePath())
+//                    .post(endpoint.getRelativePath())
 //                    .then()
 //                    .spec(responseSpecification);
 //    }
@@ -94,15 +70,4 @@ public class CrudRequester extends HttpClient implements CrudEndpointInterface {
     public ValidatableResponse put(BaseDto dto) {
         return null;
     }
-
-
-//    @Override
-//    public ValidatableResponse delete(Long id) {
-//        return given()
-//                .spec(requestSpecification)
-//                .when()
-//                .delete(API_VERSION + endpoint.getUrl() + "/" + id)
-//                .then()
-//                .spec(responseSpecification);
-//    }
 }
