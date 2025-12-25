@@ -25,7 +25,7 @@ public class CrudRequester extends HttpClient implements CrudEndpointInterface {
     public CrudRequester(RequestSpecification requestSpecification, ResponseSpecification responseSpecification, Endpoint endpoint) {
         super(requestSpecification, responseSpecification, endpoint);
     }
-//    Вариан реализации когда тело может быть пустое
+//    Вариант реализации когда тело может быть пустое
 //    @Override
 //    public ValidatableResponse post(BaseDto dto) {
 //            var request = given()
