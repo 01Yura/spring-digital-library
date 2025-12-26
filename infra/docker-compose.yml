@@ -3,10 +3,12 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: spring-digital-library-db
+    env_file:
+      - ../.env
     environment:
-      POSTGRES_DB: spring_digital_bookstore
-      POSTGRES_USER: nobugs228
-      POSTGRES_PASSWORD: nobugs228PASSWORD!#
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +17,7 @@ services:
     networks:
       - spring-library-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nobugs228 -d spring_digital_bookstore"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,36 +28,40 @@ services:
     image: 01yura/spring-digital-bookstore:latest
     pull_policy: always
     container_name: spring-digital-bookstore-app
+    env_file:
+      - ../.env
     environment:
       # Настройки подключения к БД
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/spring_digital_bookstore
-      SPRING_DATASOURCE_USERNAME: nobugs228
-      SPRING_DATASOURCE_PASSWORD: nobugs228PASSWORD!#
+      # Для Docker используйте: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      # Для локальной разработки используйте: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
 
       # JPA/Hibernate настройки
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: "false"
-      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL}
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: ${SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL}
 
       # JWT настройки
-      JWT_SECRET: my-secret-key-for-jwt-generation
-      JWT_EXPIRATION: 300000
-      JWT_REFRESH_EXPIRATION: 86400000
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
 
       # Swagger/OpenAPI настройки
-      SPRINGDOC_API_DOCS_PATH: /v3/api-docs
-      SPRINGDOC_SWAGGER_UI_PATH: /swagger-ui.html
-      SPRINGDOC_SWAGGER_UI_OPERATIONS_SORTER: method
-      SPRINGDOC_SWAGGER_UI_TAGS_SORTER: alpha
+      SPRINGDOC_API_DOCS_PATH: ${SPRINGDOC_API_DOCS_PATH}
+      SPRINGDOC_SWAGGER_UI_PATH: ${SPRINGDOC_SWAGGER_UI_PATH}
+      SPRINGDOC_SWAGGER_UI_OPERATIONS_SORTER: ${SPRINGDOC_SWAGGER_UI_OPERATIONS_SORTER}
+      SPRINGDOC_SWAGGER_UI_TAGS_SORTER: ${SPRINGDOC_SWAGGER_UI_TAGS_SORTER}
 
       # JVM настройки
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      JAVA_OPTS: ${JAVA_OPTS}
 
       # Путь для хранения изображений книг
-      APP_IMAGES_STORAGE_PATH: /opt/spring-digital-bookstore/pictures
+      APP_IMAGES_STORAGE_PATH: ${APP_IMAGES_STORAGE_PATH}
       # Путь для хранения PDF файлов книг
-      APP_PDF_STORAGE_PATH: /opt/spring-digital-bookstore/pdf
+      APP_PDF_STORAGE_PATH: ${APP_PDF_STORAGE_PATH}
     ports:
       - "8088:8080"
     volumes:
