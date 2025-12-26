@@ -6,10 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.model.Genre;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(description = "Запрос на полное обновление книги. Все поля обязательны для замены ресурса целиком. " +
         "Если переданы не все поля, возвращается ошибка 400. Автора можно изменить, указав новое имя автора.")
 public class PutBookRequest extends BaseDto {

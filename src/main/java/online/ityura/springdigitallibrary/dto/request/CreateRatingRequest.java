@@ -5,9 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import online.ityura.springdigitallibrary.dto.BaseDto;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(description = "Запрос на создание рейтинга")
 public class CreateRatingRequest extends BaseDto {
     

@@ -6,10 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.testinfra.generators.RegexGen;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(description = "Запрос на регистрацию нового пользователя")
 public class RegisterRequest extends BaseDto {
     

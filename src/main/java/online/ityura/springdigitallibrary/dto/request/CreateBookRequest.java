@@ -5,10 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import online.ityura.springdigitallibrary.dto.BaseDto;
 import online.ityura.springdigitallibrary.model.Genre;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(description = "Запрос на создание новой книги")
 public class CreateBookRequest extends BaseDto {
     
