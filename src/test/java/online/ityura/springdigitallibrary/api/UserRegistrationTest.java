@@ -9,6 +9,7 @@ import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.testinfra.comparators.UniversalComparator;
 import online.ityura.springdigitallibrary.testinfra.database.Condition;
 import online.ityura.springdigitallibrary.testinfra.database.DBRequest;
+import online.ityura.springdigitallibrary.testinfra.database.DataBaseSteps;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDataGenerator;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
 import online.ityura.springdigitallibrary.testinfra.requests.clients.CrudRequester;
@@ -235,11 +236,7 @@ public class UserRegistrationTest extends BaseApiTest {
         softly.assertThat(isUserExist).isTrue();
 
 //        Check if the user exists in the database directly
-        User user = DBRequest.builder()
-                .requestType(DBRequest.RequestType.SELECT)
-                .table("users")
-                .where(Condition.equalTo("email", registerRequest.getEmail()))
-                .extractAs(User.class);
+        User user = DataBaseSteps.getUserByEmail(registerRequest.getEmail());
 
         softly.assertThat(user).isNotNull();
         softly.assertThat(user.getId()).isInstanceOf(Long.class);
@@ -301,8 +298,7 @@ public class UserRegistrationTest extends BaseApiTest {
         softly.assertThat(isUserExist).isFalse();
 
 //        Check that the user does not exist in the database directly
-//        Note: DBRequest.extractAs(User.class) is not implemented, so we skip direct DB check
-//        The admin API check above is sufficient to verify user was not created
+
 
     }
 }
