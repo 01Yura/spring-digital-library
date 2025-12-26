@@ -7,8 +7,6 @@ import online.ityura.springdigitallibrary.dto.response.ErrorResponse;
 import online.ityura.springdigitallibrary.dto.response.RegisterResponse;
 import online.ityura.springdigitallibrary.model.User;
 import online.ityura.springdigitallibrary.testinfra.comparators.UniversalComparator;
-import online.ityura.springdigitallibrary.testinfra.database.Condition;
-import online.ityura.springdigitallibrary.testinfra.database.DBRequest;
 import online.ityura.springdigitallibrary.testinfra.database.DataBaseSteps;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDataGenerator;
 import online.ityura.springdigitallibrary.testinfra.generators.RandomDtoGeneratorWithFaker;
@@ -16,7 +14,6 @@ import online.ityura.springdigitallibrary.testinfra.requests.clients.CrudRequest
 import online.ityura.springdigitallibrary.testinfra.requests.clients.Endpoint;
 import online.ityura.springdigitallibrary.testinfra.specs.RequestSpecs;
 import online.ityura.springdigitallibrary.testinfra.specs.ResponseSpecs;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -238,13 +235,11 @@ public class UserRegistrationTest extends BaseApiTest {
 //        Check if the user exists in the database directly
         User user = DataBaseSteps.getUserByEmail(registerRequest.getEmail());
 
-        softly.assertThat(user).isNotNull();
-        softly.assertThat(user.getId()).isInstanceOf(Long.class);
-        softly.assertThat(user.getNickname()).isEqualTo(registerRequest.getNickname());
-        softly.assertThat(user.getEmail()).isEqualTo(registerRequest.getEmail());
-        softly.assertThat(user.getPasswordHash()).isNotNull();
+        // Compare User from DB with RegisterRequest (nickname, email, and validations)
+        UniversalComparator.match(user, registerRequest);
+        
+        // Compare role separately (RegisterResponse doesn't have other fields to compare)
         softly.assertThat(user.getRole()).isEqualTo(registerResponse.getRole());
-        softly.assertThat(user.getCreatedAt()).isNotNull();
     }
 
     @ParameterizedTest()
@@ -298,7 +293,7 @@ public class UserRegistrationTest extends BaseApiTest {
         softly.assertThat(isUserExist).isFalse();
 
 //        Check that the user does not exist in the database directly
-
+        softly.assertThat(DataBaseSteps.userExists(registerRequest.getEmail())).isFalse();
 
     }
 }
