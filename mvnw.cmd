@@ -175,15 +175,37 @@ if (!$actualDistributionDir) {
 
 Write-Verbose "Found extracted Maven distribution directory: $actualDistributionDir"
 Rename-Item -Path "$TMP_DOWNLOAD_DIR/$actualDistributionDir" -NewName $MAVEN_HOME_NAME | Out-Null
-try {
-  Move-Item -Path "$TMP_DOWNLOAD_DIR/$MAVEN_HOME_NAME" -Destination $MAVEN_HOME_PARENT | Out-Null
-} catch {
-  if (! (Test-Path -Path "$MAVEN_HOME" -PathType Container)) {
-    Write-Error "fail to move MAVEN_HOME"
+
+# Check if MAVEN_HOME already exists (might have been created by another process)
+if (Test-Path -Path "$MAVEN_HOME" -PathType Container) {
+  Write-Verbose "MAVEN_HOME already exists at $MAVEN_HOME, skipping move"
+} else {
+  try {
+    # Use Copy-Item instead of Move-Item for better reliability on Windows
+    # Copy the directory to the parent location (same as Move-Item behavior)
+    Copy-Item -Path "$TMP_DOWNLOAD_DIR/$MAVEN_HOME_NAME" -Destination "$MAVEN_HOME_PARENT" -Recurse -Force | Out-Null
+    # Verify the copy was successful
+    if (! (Test-Path -Path "$MAVEN_HOME/bin/$MVN_CMD" -PathType Leaf)) {
+      throw "Copy verification failed: $MAVEN_HOME/bin/$MVN_CMD not found"
+    }
+  } catch {
+    # If copy failed, try Move-Item as fallback
+    try {
+      Write-Verbose "Copy failed, trying Move-Item as fallback: $_"
+      Move-Item -Path "$TMP_DOWNLOAD_DIR/$MAVEN_HOME_NAME" -Destination $MAVEN_HOME_PARENT -Force | Out-Null
+    } catch {
+      # Final check - maybe another process already created it
+      if (! (Test-Path -Path "$MAVEN_HOME" -PathType Container)) {
+        Write-Error "fail to move MAVEN_HOME: $_"
+      } else {
+        Write-Verbose "MAVEN_HOME exists after failed move, continuing"
+      }
+    }
   }
-} finally {
-  try { Remove-Item $TMP_DOWNLOAD_DIR -Recurse -Force | Out-Null }
-  catch { Write-Warning "Cannot remove $TMP_DOWNLOAD_DIR" }
 }
+
+# Clean up temp directory
+try { Remove-Item $TMP_DOWNLOAD_DIR -Recurse -Force -ErrorAction SilentlyContinue | Out-Null }
+catch { Write-Warning "Cannot remove $TMP_DOWNLOAD_DIR" }
 
 Write-Output "MVN_CMD=$MAVEN_HOME/bin/$MVN_CMD"
