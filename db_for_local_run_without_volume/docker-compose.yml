@@ -2,8 +2,6 @@ services:
   db:
     container_name: POSTGRES_DB_SPRING_DIGITAL_BOOKSTORE
     image: postgres:16-alpine
-    env_file:
-      - ../.env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
