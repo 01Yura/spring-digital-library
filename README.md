@@ -48,13 +48,30 @@ CREATE DATABASE spring_digital_bookstore;
 
 ### 3. Настройка конфигурации
 
-Отредактируйте `src/main/resources/application.properties`:
+**Рекомендуется использовать `.env` файл** для хранения секретных данных (БД пароли, API ключи).
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/spring_digital_bookstore
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+Создайте файл `.env` в корне проекта на основе `.env.example`:
+
+```bash
+# Windows
+copy .env.example .env
+
+# Linux/Mac
+cp .env.example .env
 ```
+
+Затем отредактируйте `.env` файл и заполните реальными значениями:
+
+```env
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/spring_digital_bookstore
+SPRING_DATASOURCE_USERNAME=your_username
+SPRING_DATASOURCE_PASSWORD=your_password
+OPENAI_API_KEY=your-openai-api-key
+```
+
+**Важно:** Файл `.env` уже добавлен в `.gitignore` и не будет закоммичен в репозиторий.
+
+Альтернативно, вы можете отредактировать `src/main/resources/application.properties` напрямую, но это не рекомендуется для продакшена.
 
 ### 4. Настройка путей для файлов
 
@@ -75,7 +92,32 @@ mkdir -p /opt/spring-digital-bookstore/pdf
 - `APP_IMAGES_STORAGE_PATH` - путь для изображений книг
 - `APP_PDF_STORAGE_PATH` - путь для PDF файлов
 
-### 5. Запуск приложения
+### 5. Настройка OpenAI API (опционально)
+
+Для работы эндпоинта отправки сообщений читателям необходимо настроить OpenAI API ключ.
+
+**Рекомендуемый способ:** Добавьте ключ в `.env` файл (см. шаг 3):
+
+```env
+OPENAI_API_KEY=your-api-key-here
+```
+
+**Альтернативный способ:** Установите переменную окружения:
+
+```bash
+# Windows (PowerShell)
+$env:OPENAI_API_KEY="your-api-key-here"
+
+# Windows (CMD)
+set OPENAI_API_KEY=your-api-key-here
+
+# Linux/Mac
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+**Важно:** Не коммитьте реальный API ключ в репозиторий! Файл `.env` уже в `.gitignore`.
+
+### 6. Запуск приложения
 
 ```bash
 mvn spring-boot:run
@@ -104,6 +146,7 @@ mvn spring-boot:run
 - `GET /api/v1/books/{id}` - Получить книгу по ID
 - `GET /api/v1/books/{id}/image` - Получить изображение книги
 - `GET /api/v1/books/{id}/reviews` - Получить отзывы на книгу
+- `POST /api/v1/books/{id}/message` - Отправить сообщение читателю о книге (требует OpenAI API ключ)
 
 ### Книги (требуется аутентификация)
 
@@ -171,4 +214,3 @@ src/
 ## Лицензия
 
 Этот проект создан в образовательных целях.
-
