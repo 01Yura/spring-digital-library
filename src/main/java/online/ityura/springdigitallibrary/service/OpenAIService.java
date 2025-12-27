@@ -40,7 +40,7 @@ public class OpenAIService {
         try {
             // Создаем запрос
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "gpt-5-nano");
+            requestBody.put("model", "gpt-5.1");
             requestBody.put("input", prompt);
             
             // Устанавливаем заголовки
