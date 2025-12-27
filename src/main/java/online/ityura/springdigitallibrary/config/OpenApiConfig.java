@@ -29,7 +29,7 @@ public class OpenApiConfig {
                                 "Для логина админом используйте: admin@gmail.com , admin<br><br>" +
 
                                 "Для подключения к БД PostgreSQL используйте следующие параметры подключения:<br>" +
-                                "&nbsp;&nbsp;<b>IP:</b> 176.126.103.46:5432<br>" +
+                                "&nbsp;&nbsp;<b>IP:</b> 144.31.81.190:5432<br>" +
                                 "&nbsp;&nbsp;<b>Database:</b> spring_digital_bookstore<br>" +
                                 "&nbsp;&nbsp;<b>Username:</b> readonly_user<br>" +
                                 "&nbsp;&nbsp;<b>Password:</b> pass_123_XYZ!<br><br>")
