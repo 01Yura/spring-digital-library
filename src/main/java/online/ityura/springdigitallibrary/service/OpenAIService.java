@@ -199,7 +199,8 @@ public class OpenAIService {
                     JsonNode firstContent = content.get(0);
                     JsonNode text = firstContent.get("text");
                     if (text != null) {
-                        return text.asText();
+                        String rawText = text.asText();
+                        return cleanMarkdownFormatting(rawText);
                     }
                 }
             }
@@ -208,6 +209,46 @@ public class OpenAIService {
             log.error("Error extracting text from response", e);
             throw new RuntimeException("Error extracting text from response: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Убирает Markdown-форматирование из текста для более читаемого отображения
+     */
+    private String cleanMarkdownFormatting(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        
+        String cleaned = text;
+        
+        // Убираем жирный текст (**текст** или __текст__)
+        cleaned = cleaned.replaceAll("\\*\\*(.*?)\\*\\*", "$1");
+        cleaned = cleaned.replaceAll("__(.*?)__", "$1");
+        
+        // Убираем курсив (*текст* или _текст_), но только если это не часть жирного текста
+        // Сначала убираем курсив, который не является частью жирного
+        cleaned = cleaned.replaceAll("(?<!\\*)\\*(?!\\*)(.*?)(?<!\\*)\\*(?!\\*)", "$1");
+        cleaned = cleaned.replaceAll("(?<!_)_(?!_)(.*?)(?<!_)_(?!_)", "$1");
+        
+        // Убираем заголовки (### Заголовок -> Заголовок) - используем MULTILINE режим
+        cleaned = cleaned.replaceAll("(?m)^#{1,6}\\s+", "");
+        
+        // Убираем символы для списков (- пункт или * пункт) в начале строки
+        cleaned = cleaned.replaceAll("(?m)^[-*+]\\s+", "");
+        
+        // Убираем символы для цитат (> текст) в начале строки
+        cleaned = cleaned.replaceAll("(?m)^>\\s+", "");
+        
+        // Убираем горизонтальные разделители (--- или ***) - целые строки
+        cleaned = cleaned.replaceAll("(?m)^[-*]{3,}\\s*$", "");
+        
+        // Заменяем все переносы строк на пробелы
+        cleaned = cleaned.replaceAll("\\n+", " ");
+        
+        // Убираем множественные пробелы (но сохраняем один пробел)
+        cleaned = cleaned.replaceAll(" {2,}", " ");
+        
+        return cleaned.trim();
     }
 }
 
