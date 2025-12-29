@@ -50,23 +50,23 @@ CREATE DATABASE spring_digital_bookstore;
 
 **Рекомендуется использовать `.env` файл** для хранения секретных данных (БД пароли, API ключи).
 
-Создайте файл `.env` в корне проекта на основе `.env.example`:
-
-```bash
-# Windows
-copy .env.example .env
-
-# Linux/Mac
-cp .env.example .env
-```
-
-Затем отредактируйте `.env` файл и заполните реальными значениями:
+Создайте файл `.env` в корне проекта и заполните реальными значениями:
 
 ```env
+# Настройки базы данных
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/spring_digital_bookstore
 SPRING_DATASOURCE_USERNAME=your_username
 SPRING_DATASOURCE_PASSWORD=your_password
+
+# JWT настройки
+JWT_SECRET=your-secret-key-here-min-256-bits
+
+# OpenAI API (опционально, для эндпоинта отправки сообщений читателям)
 OPENAI_API_KEY=your-openai-api-key
+
+# Пути для хранения файлов (опционально, есть значения по умолчанию)
+APP_IMAGES_STORAGE_PATH=G:\opt\spring-digital-bookstore\pictures
+APP_PDF_STORAGE_PATH=G:\opt\spring-digital-bookstore\pdf
 ```
 
 **Важно:** Файл `.env` уже добавлен в `.gitignore` и не будет закоммичен в репозиторий.
@@ -119,11 +119,30 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ### 6. Запуск приложения
 
+#### Локальный запуск (без Docker)
+
 ```bash
 mvn spring-boot:run
 ```
 
 Приложение будет доступно по адресу: `http://localhost:8080`
+
+#### Запуск через Docker Compose
+
+Для запуска через Docker Compose используйте файл `infra/docker-compose.yml`:
+
+```bash
+cd infra
+docker-compose up -d
+```
+
+Приложение будет доступно по адресу: `http://localhost:8088` (порт 8088 проброшен на 8080 внутри контейнера)
+
+Для остановки:
+
+```bash
+docker-compose down
+```
 
 ## API Документация
 
@@ -131,6 +150,11 @@ mvn spring-boot:run
 
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+## Системные эндпоинты (доступны без авторизации)
+
+- `GET /api/v1/health` - Проверка состояния приложения (uptime, timestamp)
+- `GET /api/v1/kuberinfo` - Информация о Kubernetes окружении (pod, node, OS)
 
 ## Основные эндпоинты
 
@@ -142,10 +166,11 @@ mvn spring-boot:run
 
 ### Книги (публичные)
 
-- `GET /api/v1/books` - Получить список книг (с пагинацией)
+- `GET /api/v1/books` - Получить список книг (с пагинацией и сортировкой)
 - `GET /api/v1/books/{id}` - Получить книгу по ID
 - `GET /api/v1/books/{id}/image` - Получить изображение книги
-- `GET /api/v1/books/{id}/reviews` - Получить отзывы на книгу
+- `GET /api/v1/books/images/all` - Получить все изображения книг в ZIP архиве
+- `GET /api/v1/books/{id}/reviews` - Получить отзывы на книгу (с пагинацией)
 - `POST /api/v1/books/{id}/message` - Отправить сообщение читателю о книге (требует OpenAI API ключ)
 
 ### Книги (требуется аутентификация)
@@ -154,22 +179,31 @@ mvn spring-boot:run
 
 ### Рейтинги (требуется аутентификация)
 
-- `POST /api/v1/books/{id}/ratings` - Создать рейтинг
-- `PATCH /api/v1/books/{id}/ratings` - Обновить свой рейтинг
+- `POST /api/v1/books/{id}/ratings` - Создать рейтинг (от 1 до 10)
+- `PUT /api/v1/books/{id}/ratings/my` - Обновить свой рейтинг
 
 ### Отзывы (требуется аутентификация)
 
 - `POST /api/v1/books/{id}/reviews` - Создать отзыв
-- `PATCH /api/v1/books/{id}/reviews` - Обновить свой отзыв
-- `GET /api/v1/user/reviews` - Получить свои отзывы
+- `PUT /api/v1/books/{id}/reviews/my` - Обновить свой отзыв
+- `GET /api/v1/reviews/my` - Получить свои отзывы (с пагинацией)
 
 ### Административные функции (требуется роль ADMIN)
 
+#### Управление книгами
+
 - `POST /api/v1/admin/books` - Создать книгу
-- `PUT /api/v1/admin/books/{id}` - Обновить книгу
-- `PATCH /api/v1/admin/books/{id}` - Частично обновить книгу
+- `POST /api/v1/admin/books/batch` - Создать несколько книг одновременно
+- `PUT /api/v1/admin/books/{id}` - Полностью обновить книгу
+- `PATCH /api/v1/admin/books/{id}` - Частично обновить книгу (JSON или multipart/form-data с изображением)
 - `DELETE /api/v1/admin/books/{id}` - Удалить книгу
-- `POST /api/v1/admin/books/{id}/image` - Загрузить изображение книги
+- `DELETE /api/v1/admin/books/authors/{id}` - Удалить автора и все его книги
+- `POST /api/v1/admin/books/{id}/image` - Загрузить изображение книги (multipart/form-data)
+
+#### Управление пользователями
+
+- `GET /api/v1/admin/users` - Получить список всех пользователей
+- `DELETE /api/v1/admin/users/{id}` - Удалить пользователя (нельзя удалить ADMIN)
 
 ## Тестирование
 
@@ -179,7 +213,21 @@ mvn spring-boot:run
 mvn test
 ```
 
-Юнит-тесты находятся в директории `src/test/java/online/ityura/springdigitallibrary/unit/`
+### Типы тестов
+
+- **Юнит-тесты** находятся в директории `src/test/java/online/ityura/springdigitallibrary/unit/`
+- **API тесты** находятся в директории `src/test/java/online/ityura/springdigitallibrary/api/`
+
+### Инфраструктура для тестирования
+
+Проект включает инфраструктуру для тестирования (`testinfra`):
+
+- **DataBaseSteps** - удобные методы для работы с БД в тестах
+- **DBRequest** - универсальный класс для выполнения SQL запросов
+- **UniversalComparator** - сравнение DTO объектов по правилам из `dto-comparison.properties`
+- **HttpClient** - базовый класс для HTTP клиентов
+- **CrudRequester** - клиент для CRUD операций через REST API
+- **RandomDataGenerator** - генерация тестовых данных
 
 ## Структура проекта
 
@@ -195,21 +243,48 @@ src/
 │   │       ├── model/           # JPA сущности
 │   │       ├── repository/      # Репозитории Spring Data JPA
 │   │       ├── security/        # Конфигурация безопасности
-│   │       └── service/         # Бизнес-логика
+│   │       ├── service/         # Бизнес-логика
+│   │       └── testinfra/       # Инфраструктура для тестирования
+│   │           ├── comparators/ # Сравнение объектов
+│   │           ├── configs/     # Конфигурация для тестов
+│   │           ├── database/    # Работа с БД в тестах
+│   │           ├── generators/  # Генерация тестовых данных
+│   │           ├── helpers/    # Вспомогательные классы
+│   │           ├── requests/   # HTTP клиенты для тестов
+│   │           └── specs/      # Спецификации для REST Assured
 │   └── resources/
-│       └── application.properties
+│       ├── application.properties
+│       ├── dto-comparison.properties  # Правила сравнения DTO
+│       ├── pictures/           # Исходные изображения книг
+│       └── pdf/                # Исходные PDF файлы книг
 └── test/
     └── java/
         └── online/ityura/springdigitallibrary/
-            └── unit/            # Юнит-тесты
+            ├── api/            # API тесты
+            └── unit/           # Юнит-тесты
 ```
+
+## Дополнительные скрипты
+
+- `scripts/build-and-push.ps1` - PowerShell скрипт для сборки и публикации Docker образа
+- `scripts/clear-maven-wrapper-cache.ps1` - Очистка кэша Maven wrapper
+- `scripts/create_readonly_user_docker.sh` - Создание пользователя PostgreSQL с правами read-only
 
 ## Безопасность
 
-- Аутентификация через JWT токены
+- Аутентификация через JWT токены (access token - 5 минут, refresh token - 24 часа)
 - Пароли хешируются с использованием BCrypt
 - Роли пользователей: USER, ADMIN
 - Защита эндпоинтов через Spring Security
+- Публичные эндпоинты доступны без авторизации (список книг, детали книги, изображения, отзывы на книгу)
+- Защищенные эндпоинты требуют JWT токен в заголовке `Authorization: Bearer <token>`
+
+### Учетные данные по умолчанию
+
+При первом запуске создаются два администратора:
+
+- Email: `admin@gmail.com`, Пароль: `admin`
+- Email: `crackMyPassword@gmail.com`, Пароль: `137Password123!@#`
 
 ## Лицензия
 
