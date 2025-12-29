@@ -3,6 +3,7 @@ package online.ityura.springdigitallibrary.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,7 +40,8 @@ public class BookMessageController {
                     description = "Сообщение успешно отправлено и получен ответ от читателя",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = MessageResponse.class)
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\": \"some text\"}")
                     )
             ),
             @ApiResponse(
@@ -47,7 +49,8 @@ public class BookMessageController {
                     description = "Книга не найдена",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 15\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message\"}")
                     )
             ),
             @ApiResponse(
@@ -55,7 +58,8 @@ public class BookMessageController {
                     description = "Ошибка валидации запроса",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"message\":\"Message is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message\"}")
                     )
             ),
             @ApiResponse(
@@ -63,7 +67,8 @@ public class BookMessageController {
                     description = "Ошибка при обращении к OpenAI API",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":500,\"error\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error calling OpenAI API: Connection timeout\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message\"}")
                     )
             )
     })
