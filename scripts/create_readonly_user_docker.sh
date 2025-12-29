@@ -17,8 +17,8 @@ set -e  # Остановка при ошибке
 # Можно переопределить через переменную окружения: DB_ADMIN_PASSWORD=your_password
 # Если запускаете с хоста (не внутри контейнера), укажите DB_HOST=localhost DB_PORT=5432
 DB_NAME="${DB_NAME:-spring_digital_bookstore}"
-DB_ADMIN_USER="${DB_ADMIN_USER:-nobugs228}"
-DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-nobugs228PASSWORD!#}"
+DB_ADMIN_USER="${DB_ADMIN_USER}"
+DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
 
