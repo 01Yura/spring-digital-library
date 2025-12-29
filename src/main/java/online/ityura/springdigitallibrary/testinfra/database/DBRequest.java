@@ -6,16 +6,14 @@ import online.ityura.springdigitallibrary.model.Rating;
 import online.ityura.springdigitallibrary.model.Review;
 import online.ityura.springdigitallibrary.model.Role;
 import online.ityura.springdigitallibrary.model.User;
+import online.ityura.springdigitallibrary.testinfra.configs.Config;
 import lombok.Builder;
 import lombok.Data;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * DBRequest - Универсальный класс для выполнения запросов к базе данных
@@ -394,10 +392,10 @@ public class DBRequest {
      * Создает соединение с базой данных
      * 
      * Этот метод использует настройки из application.properties для подключения к БД.
-     * Приоритет чтения настроек:
+     * Использует класс Config для чтения свойств с учетом приоритетов:
      * 1. Системные свойства (System.getProperty)
      * 2. Переменные окружения (System.getenv)
-     * 3. application.properties файл
+     * 3. application.properties файл (с обработкой синтаксиса ${VAR:default})
      * 
      * Используемые свойства:
      * - spring.datasource.url - URL базы данных
@@ -408,78 +406,19 @@ public class DBRequest {
      * @throws SQLException если не удается подключиться к базе данных
      */
     private Connection getConnection() throws SQLException {
-        String url = getApplicationProperty("spring.datasource.url");
-        String username = getApplicationProperty("spring.datasource.username");
-        String password = getApplicationProperty("spring.datasource.password");
+        // Явно загружаем драйвер PostgreSQL для надежности
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("PostgreSQL JDBC Driver not found. Make sure postgresql dependency is in classpath.", e);
+        }
+        
+        String url = Config.getApplicationProperty("spring.datasource.url");
+        String username = Config.getApplicationProperty("spring.datasource.username");
+        String password = Config.getApplicationProperty("spring.datasource.password");
         
         return DriverManager.getConnection(url, username, password);
     }
-
-    /**
-     * Получает значение свойства из application.properties с учетом приоритетов
-     * 
-     * Приоритет чтения:
-     * 1. Системные свойства (System.getProperty)
-     * 2. Переменные окружения (System.getenv) - преобразует точку в подчеркивание и в верхний регистр
-     * 3. application.properties файл
-     * 
-     * @param key ключ свойства
-     * @return значение свойства
-     * @throws RuntimeException если свойство не найдено
-     */
-    private String getApplicationProperty(String key) {
-        // ПРИОРИТЕТ 1 - системное свойство
-        String systemValue = System.getProperty(key);
-        if (systemValue != null) return systemValue;
-
-        // ПРИОРИТЕТ 2 - переменная окружения
-        // spring.datasource.url -> SPRING_DATASOURCE_URL
-        String envKey = key.toUpperCase().replace(".", "_");
-        String envValue = System.getenv(envKey);
-        if (envValue != null) return envValue;
-
-        // ПРИОРИТЕТ 3 - application.properties
-        Properties props = loadApplicationProperties();
-        String propValue = props.getProperty(key);
-        if (propValue != null) return propValue;
-
-        throw new RuntimeException("Property '" + key + "' not found in system properties, environment variables, or application.properties");
-    }
-
-    /**
-     * Загружает application.properties файл из ресурсов
-     * 
-     * Использует кэширование для оптимизации - файл загружается один раз.
-     * 
-     * @return Properties объект с настройками из application.properties
-     */
-    private static Properties loadApplicationProperties() {
-        if (applicationProperties != null) {
-            return applicationProperties;
-        }
-        
-        synchronized (DBRequest.class) {
-            if (applicationProperties != null) {
-                return applicationProperties;
-            }
-            
-            Properties props = new Properties();
-            try (InputStream inputStream = DBRequest.class.getClassLoader()
-                    .getResourceAsStream("application.properties")) {
-                if (inputStream == null) {
-                    throw new RuntimeException("application.properties is not found in resources");
-                }
-                props.load(inputStream);
-                applicationProperties = props;
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load application.properties", e);
-            }
-            return applicationProperties;
-        }
-    }
-
-    /** Кэш для application.properties */
-    private static Properties applicationProperties;
 
     /**
      * Перечисление типов SQL запросов
