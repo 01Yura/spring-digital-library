@@ -22,10 +22,20 @@ jobs:
                   username: ${{ secrets.DOCKER_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-            - name: Build Docker image
-              run: |
-                  docker build -f infra/Dockerfile -t 01yura/spring-digital-bookstore:latest .
+            - name: Cache Docker layers
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/.buildx-cache
+                  key: ${{ runner.os }}-buildx-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-buildx-
 
-            - name: Push Docker image
-              run: |
-                  docker push 01yura/spring-digital-bookstore:latest
+            - name: Build and Push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./infra/Dockerfile
+                  push: true
+                  tags: 01yura/spring-digital-bookstore:latest
+                  cache-from: type=local,src=/tmp/.buildx-cache
+                  cache-to: type=local,dest=/tmp/.buildx-cache,mode=max

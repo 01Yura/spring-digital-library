@@ -6,11 +6,13 @@ WORKDIR /app
 
 # Копируем pom.xml и загружаем зависимости (кэшируется если pom.xml не изменился)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline -B
 
 # Копируем исходный код и собираем приложение
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests -B
 
 # Этап 2: Финальный образ с минимальным размером
 FROM eclipse-temurin:21-jre-alpine
