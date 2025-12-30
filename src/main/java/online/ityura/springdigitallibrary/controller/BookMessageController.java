@@ -29,7 +29,7 @@ public class BookMessageController {
     private final BookMessageService bookMessageService;
 
     @Operation(
-            summary = "Отправить вопрос о книге рандомному читателю (ЦЕНЗУРА)",
+            summary = "Отправить вопрос о книге рандомному читателю (ЦЕНЗУРНО)",
             description = "Отправляет сообщение (вопрос) рандомному читателю, который уже прочитал книгу. " +
                     "Читатель отвечает с юмором, но цензурно. Сообщение приходит не сразу, так как ему надо " +
                     "время на написание ответа. Подождите 10-20 сек."
@@ -50,7 +50,7 @@ public class BookMessageController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 15\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message\"}")
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 15\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/censored\"}")
                     )
             ),
             @ApiResponse(
@@ -59,7 +59,7 @@ public class BookMessageController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"message\":\"Message is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message\"}")
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"message\":\"Message is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/censored\"}")
                     )
             ),
             @ApiResponse(
@@ -68,12 +68,12 @@ public class BookMessageController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":500,\"error\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error calling OpenAI API: Connection timeout\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message\"}")
+                            examples = @ExampleObject(value = "{\"status\":500,\"error\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error calling OpenAI API: Connection timeout\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/censored\"}")
                     )
             )
     })
     @SecurityRequirements
-    @PostMapping("/{bookId}/message")
+    @PostMapping("/{bookId}/message/censored")
     public ResponseEntity<MessageResponse> sendMessageToReader(
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId,
@@ -89,7 +89,7 @@ public class BookMessageController {
     }
 
     @Operation(
-            summary = "Отправить вопрос о книге рандомному читателю (БЕЗ ЦЕНЗУРЫ!!!)",
+            summary = "Отправить вопрос о книге книге рандомному читателю (НЕЦЕНЗУРНО)",
             description = "Отправляет сообщение (вопрос) рандомному читателю, который уже прочитал книгу. " +
                     "Он отвечает с юмором, используя нецензурную лексику и жесткие шутки. " +
                     "Сообщение приходит не сразу, так как ему надо время на написание ответа. Подождите 10-20 сек."
@@ -110,7 +110,7 @@ public class BookMessageController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 15\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/gemini\"}")
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 15\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/uncensored\"}")
                     )
             ),
             @ApiResponse(
@@ -119,7 +119,7 @@ public class BookMessageController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"message\":\"Message is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/gemini\"}")
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"message\":\"Message is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/uncensored\"}")
                     )
             ),
             @ApiResponse(
@@ -128,12 +128,12 @@ public class BookMessageController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"status\":500,\"error\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error calling Gemini API: Connection timeout\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/gemini\"}")
+                            examples = @ExampleObject(value = "{\"status\":500,\"error\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error calling Gemini API: Connection timeout\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/uncensored\"}")
                     )
             )
     })
     @SecurityRequirements
-    @PostMapping("/{bookId}/message/gemini")
+    @PostMapping("/{bookId}/message/uncensored")
     public ResponseEntity<MessageResponse> sendMessageToReaderViaGemini(
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId,
