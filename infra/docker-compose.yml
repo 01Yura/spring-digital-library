@@ -65,6 +65,9 @@ services:
       
       # OpenAI API настройки
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      
+      # Gemini API настройки
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     ports:
       - "8088:8080"
     volumes:

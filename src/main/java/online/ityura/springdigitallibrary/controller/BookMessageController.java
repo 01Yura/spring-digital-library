@@ -25,14 +25,14 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class BookMessageController {
-    
+
     private final BookMessageService bookMessageService;
-    
+
     @Operation(
             summary = "Отправить вопрос о книге рандомному читателю (ЦЕНЗУРА)",
             description = "Отправляет сообщение (вопрос) рандомному читателю, который уже прочитал книгу. " +
                     "Читатель отвечает с юмором, но цензурно. Сообщение приходит не сразу, так как ему надо " +
-                    "время на написание ответа. Подождите 10-20 сек, будьте терпиливы, человек старается, пишет."
+                    "время на написание ответа. Подождите 10-20 сек."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -78,13 +78,73 @@ public class BookMessageController {
             @Parameter(description = "ID книги", example = "1", required = true)
             @PathVariable Long bookId,
             @Valid @RequestBody MessageRequest messageRequest) {
-        
+
         String responseText = bookMessageService.sendMessageToReader(bookId, messageRequest.getMessage());
-        
+
         MessageResponse response = MessageResponse.builder()
                 .message(responseText)
                 .build();
-        
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Отправить вопрос о книге рандомному читателю (БЕЗ ЦЕНЗУРЫ!!!)",
+            description = "Отправляет сообщение (вопрос) рандомному читателю, который уже прочитал книгу. " +
+                    "Он отвечает с юмором, используя нецензурную лексику и жесткие шутки. " +
+                    "Сообщение приходит не сразу, так как ему надо время на написание ответа. Подождите 10-20 сек."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Сообщение успешно отправлено и получен ответ от читателя",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MessageResponse.class),
+                            examples = @ExampleObject(value = "{\"message\": \"some text\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Книга не найдена",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":404,\"error\":\"BOOK_NOT_FOUND\",\"message\":\"Book not found with id: 15\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/gemini\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Ошибка валидации запроса",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":400,\"error\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"fieldErrors\":{\"message\":\"Message is required\"},\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/gemini\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Ошибка при обращении к Gemini API",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":500,\"error\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error calling Gemini API: Connection timeout\",\"timestamp\":\"2025-12-17T13:20:00Z\",\"path\":\"/api/v1/books/15/message/gemini\"}")
+                    )
+            )
+    })
+    @SecurityRequirements
+    @PostMapping("/{bookId}/message/gemini")
+    public ResponseEntity<MessageResponse> sendMessageToReaderViaGemini(
+            @Parameter(description = "ID книги", example = "1", required = true)
+            @PathVariable Long bookId,
+            @Valid @RequestBody MessageRequest messageRequest) {
+
+        String responseText = bookMessageService.sendMessageToReaderViaGemini(bookId, messageRequest.getMessage());
+
+        MessageResponse response = MessageResponse.builder()
+                .message(responseText)
+                .build();
+
         return ResponseEntity.ok(response);
     }
 }
