@@ -221,6 +221,9 @@ public class OpenAIService {
         
         String cleaned = text;
         
+        // Убираем экранированные кавычки (\")
+        cleaned = cleaned.replace("\\\"", "\"");
+        
         // Убираем жирный текст (**текст** или __текст__)
         cleaned = cleaned.replaceAll("\\*\\*(.*?)\\*\\*", "$1");
         cleaned = cleaned.replaceAll("__(.*?)__", "$1");
