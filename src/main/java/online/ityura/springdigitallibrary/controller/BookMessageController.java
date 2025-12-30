@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/books")
-@Tag(name = "Сообщения читателям", description = "API для отправки сообщений читателям о книгах")
+@Tag(name = "Сообщения читателям", description = "API для отправки сообщений читателям о книгах (Доступно без авторизации)")
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class BookMessageController {
@@ -29,10 +29,10 @@ public class BookMessageController {
     private final BookMessageService bookMessageService;
     
     @Operation(
-            summary = "Отправить вопрос о книге рандомному читателю",
+            summary = "Отправить вопрос о книге рандомному читателю (ЦЕНЗУРА)",
             description = "Отправляет сообщение (вопрос) рандомному читателю, который уже прочитал книгу. " +
-                    "Читатель отвечает. Однако сообщение приходит не сразу, так как ему надо время на написание ответа. Подождите 20-30 сек, будьте терпиливы, человек старается, пишет. " +
-                    "Доступно без авторизации."
+                    "Читатель отвечает с юмором, но цензурно. Сообщение приходит не сразу, так как ему надо " +
+                    "время на написание ответа. Подождите 10-20 сек, будьте терпиливы, человек старается, пишет."
     )
     @ApiResponses(value = {
             @ApiResponse(
